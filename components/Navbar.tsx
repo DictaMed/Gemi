@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stethoscope, FileText, HelpCircle, Mail, FolderPlus, BookOpen, LogOut } from 'lucide-react';
+import { Stethoscope, FileText, HelpCircle, Mail, FolderPlus, BookOpen, LogOut, BarChart3 } from 'lucide-react';
 import { UserCredentials } from '../types';
 
 interface NavbarProps {
@@ -13,6 +13,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange, user, o
   const navItems = [
     { id: 'normal', label: 'Dictée', icon: Stethoscope },
     { id: 'dmi', label: 'Dossier DMI', icon: FolderPlus },
+    { id: 'stats', label: 'Stats', icon: BarChart3 }, // Nouvel onglet
     { id: 'test', label: 'Mode Test', icon: FileText },
     { id: 'guide', label: 'Guide', icon: BookOpen },
     { id: 'faq', label: 'Aide', icon: HelpCircle },
@@ -41,6 +42,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange, user, o
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentTab === item.id;
+                
+                // Masquer l'onglet stats si pas connecté (optionnel, mais plus propre)
+                if (item.id === 'stats' && !user) return null;
+
                 return (
                   <button
                     key={item.id}

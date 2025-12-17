@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { Camera, Send, X, AlertTriangle, FileText, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import { UserCredentials } from '../types';
 import { WEBHOOK_URLS } from '../config/webhooks';
+import { db } from '../config/firebase';
+import { doc, updateDoc, increment, setDoc } from 'firebase/firestore';
 
 interface DMIFormProps {
   user: UserCredentials;
@@ -37,6 +39,29 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
       };
       reader.onerror = error => reject(error);
     });
+  };
+
+  const updateStats = async () => {
+    if (user.uid) {
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        try {
+          await updateDoc(userRef, {
+            totalDMI: increment(1),
+            lastActivity: new Date().toISOString()
+          });
+        } catch (e) {
+           await setDoc(userRef, {
+            totalDictations: 0,
+            totalDMI: 1,
+            lastActivity: new Date().toISOString(),
+            accountCreated: new Date().toISOString()
+          }, { merge: true });
+        }
+      } catch (err) {
+        console.error("Erreur mise à jour stats:", err);
+      }
+    }
   };
 
   const handleSubmit = async () => {
@@ -94,6 +119,9 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
 
       // Execute both requests concurrently
       await Promise.all(promises);
+
+      // Mettre à jour les stats Firestore
+      await updateStats();
 
       setSubmitSuccess(true);
       

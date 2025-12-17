@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { PlusCircle, MinusCircle, Send, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-react';
 import { AudioRecorder } from './AudioRecorder';
 import { PatientForm } from './PatientForm';
-import { PatientInfo, AudioData, AudioFormat, AppMode, UserCredentials, WebhookPayload } from '../types';
-import { blobToBase64 } from '../utils/audioUtils';
+import { PatientInfo, AudioData, AudioFormat, AppMode, UserCredentials } from '../types';
 import { WEBHOOK_URLS } from '../config/webhooks';
+import { db } from '../config/firebase';
+import { doc, updateDoc, increment, setDoc } from 'firebase/firestore';
 
 interface DictationFormProps {
   mode: AppMode;
@@ -35,35 +36,70 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
 
   const isFormValid = validateForm();
 
+  const updateStats = async () => {
+    if (mode === AppMode.NORMAL && user.uid) {
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        // On essaie d'update, si ça fail (doc n'existe pas), on le crée
+        try {
+          await updateDoc(userRef, {
+            totalDictations: increment(1),
+            lastActivity: new Date().toISOString()
+          });
+        } catch (e) {
+          // Si le document n'existe pas encore, on le crée
+          await setDoc(userRef, {
+            totalDictations: 1,
+            totalDMI: 0,
+            lastActivity: new Date().toISOString(),
+            accountCreated: new Date().toISOString()
+          }, { merge: true });
+        }
+      } catch (err) {
+        console.error("Erreur mise à jour stats:", err);
+      }
+    }
+  };
+
   const handleSubmit = async () => {
     if (!isFormValid) return;
     setIsSubmitting(true);
     setSubmitError(null);
 
     try {
-      const payload: WebhookPayload = {
-        mode,
-        user: { login: user.login },
-        patient: { id: patientInfo.id, name: patientInfo.name },
-        audio: {
-          partie_1: blobs.part1 ? await blobToBase64(blobs.part1) : null,
-          partie_2: blobs.part2 ? await blobToBase64(blobs.part2) : null,
-          partie_3: blobs.part3 ? await blobToBase64(blobs.part3) : null,
-          partie_4: blobs.part4 ? await blobToBase64(blobs.part4) : null,
-        },
-        audio_format: audioFormat,
-        timestamp: new Date().toISOString()
-      };
+      // Création d'un objet FormData pour l'envoi multipart/form-data
+      // Cela permet à n8n de recevoir les fichiers binaires directement
+      const formData = new FormData();
+
+      // Ajout des métadonnées
+      formData.append('mode', mode);
+      formData.append('user_login', user.login);
+      formData.append('patient_id', patientInfo.id);
+      formData.append('patient_name', patientInfo.name);
+      formData.append('audio_format', audioFormat);
+      formData.append('timestamp', new Date().toISOString());
+
+      // Ajout des fichiers audio (s'ils existent)
+      // Le 3ème argument est le nom du fichier qui apparaîtra dans n8n
+      if (blobs.part1) formData.append('partie_1', blobs.part1, `partie_1.${audioFormat}`);
+      if (blobs.part2) formData.append('partie_2', blobs.part2, `partie_2.${audioFormat}`);
+      if (blobs.part3) formData.append('partie_3', blobs.part3, `partie_3.${audioFormat}`);
+      if (blobs.part4) formData.append('partie_4', blobs.part4, `partie_4.${audioFormat}`);
 
       const targetUrl = mode === AppMode.NORMAL ? WEBHOOK_URLS.AUDIO_NORMAL : WEBHOOK_URLS.AUDIO_TEST;
       
       try {
         const response = await fetch(targetUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          // Note: Ne PAS définir 'Content-Type': 'multipart/form-data' manuellement.
+          // Le navigateur le fait automatiquement avec le boundary correct lorsqu'on passe un FormData.
+          body: formData
         });
         if (!response.ok) throw new Error('Erreur serveur');
+        
+        // Mise à jour des stats seulement si envoi réussi
+        await updateStats();
+
       } catch (err) {
         console.error("Erreur d'envoi:", err);
         if (mode !== AppMode.TEST) throw err;

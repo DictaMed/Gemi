@@ -3,6 +3,7 @@ import { Navbar } from './components/Navbar';
 import { AuthForm } from './components/AuthForm';
 import { DictationForm } from './components/DictationForm';
 import { DMIForm } from './components/DMIForm';
+import { Statistics } from './pages/Statistics';
 import { FAQ } from './pages/FAQ';
 import { Guide } from './pages/Guide';
 import { Contact } from './pages/Contact';
@@ -21,13 +22,10 @@ function App() {
       if (firebaseUser) {
         setUser({
           login: firebaseUser.email || 'Utilisateur Google',
-          accessCode: 'GOOGLE_SECURED'
+          accessCode: 'GOOGLE_SECURED',
+          uid: firebaseUser.uid // Stockage de l'UID pour Firestore
         });
       } else {
-        // Si pas d'utilisateur Firebase, on ne force pas le logout immédiat 
-        // si l'utilisateur utilisait la méthode manuelle, 
-        // MAIS pour la cohérence, si on est déconnecté de Firebase, on reset user.
-        // Pour permettre le mode manuel, on ne reset que si accessCode est GOOGLE_SECURED
         setUser(prev => (prev?.accessCode === 'GOOGLE_SECURED' ? null : prev));
       }
       setLoadingAuth(false);
@@ -75,6 +73,19 @@ function App() {
            );
         }
         return <DMIForm user={user} />;
+
+      case 'stats':
+        if (!user) {
+          return (
+            <div>
+               <div className="text-center mb-6 text-indigo-600 font-medium bg-indigo-50 p-3 rounded-lg inline-block mx-auto">
+                  Veuillez vous connecter pour voir vos statistiques
+               </div>
+               <AuthForm onLogin={handleManualLogin} />
+            </div>
+          );
+       }
+       return <Statistics user={user} />;
       
       case 'test':
         return <DictationForm mode={AppMode.TEST} user={{ login: 'TEST_USER', accessCode: '0000' }} />;

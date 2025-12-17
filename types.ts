@@ -13,6 +13,14 @@ export enum AudioFormat {
 export interface UserCredentials {
   login: string;
   accessCode: string;
+  uid?: string; // Ajout de l'ID Firebase unique pour lier à la BDD
+}
+
+export interface UserStats {
+  totalDictations: number;
+  totalDMI: number;
+  lastActivity: string; // ISO Date
+  accountCreated?: string;
 }
 
 export interface PatientInfo {
