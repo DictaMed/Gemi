@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusCircle, MinusCircle, Send, CheckCircle, AlertTriangle, Settings2, Info } from 'lucide-react';
+import { PlusCircle, MinusCircle, Send, CheckCircle, AlertTriangle, Settings2, Info, ExternalLink, Mic, Volume2, PauseCircle } from 'lucide-react';
 import { AudioRecorder } from './AudioRecorder';
 import { PatientForm } from './PatientForm';
 import { PatientInfo, AudioData, AudioFormat, AppMode, UserCredentials, WebhookPayload } from '../types';
@@ -13,7 +13,7 @@ interface DictationFormProps {
 
 export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
   const [patientInfo, setPatientInfo] = useState<PatientInfo>({ id: '', name: '' });
-  // Default to WAV as preferred by browser/backend, selector removed from UI in previous step
+  // Default to WAV as preferred by browser/backend
   const [audioFormat] = useState<AudioFormat>(AudioFormat.WAV);
   const [showPart4, setShowPart4] = useState(false);
   
@@ -146,6 +146,80 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
           </div>
         </div>
       </div>
+
+      {/* --- INSTRUCTIONS MODE TEST --- */}
+      {mode === AppMode.TEST && (
+        <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 mb-8 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white p-6 -mx-8 -mt-8 mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h3 className="text-2xl font-bold flex items-center gap-2">
+                🎉 Bienvenue dans le Mode Test !
+              </h3>
+              <p className="text-blue-50 mt-1">Testez gratuitement DictaMed avec des données fictives. Aucune inscription requise !</p>
+            </div>
+            
+            <a 
+              href="https://docs.google.com/spreadsheets/d/1ReZHjndHc6o8O1bx1OfZXnZ8HWt8nLSo2X7IS6rcZXE/edit?usp=sharing" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold flex items-center shadow-lg hover:bg-blue-50 transition-colors whitespace-nowrap"
+            >
+              <ExternalLink size={18} className="mr-2" />
+              Ouvrir le Google Sheet Public
+            </a>
+          </div>
+
+          <div className="mb-8">
+            <h4 className="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
+              <span className="bg-slate-100 p-1.5 rounded-lg text-slate-600">📝</span> Consignes d'utilisation
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { icon: Mic, text: "Autorisez le micro" },
+                { icon: Volume2, text: "Parlez clairement et lentement" },
+                { icon: Volume2, text: "Environnement calme requis" },
+                { icon: PauseCircle, text: "Pause entre chaque valeur" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100 text-slate-700 font-medium text-sm">
+                  <span className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0">{i + 1}</span>
+                  {item.text}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+             <h4 className="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
+              <span className="bg-slate-100 p-1.5 rounded-lg text-slate-600">💬</span> Exemples de dictée
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
+                <strong className="text-blue-800 block mb-2">📋 Section 1 - Clinique</strong>
+                <p className="text-slate-600 italic mb-3">"Âge 45 ans, sexe masculin, BMI 28, tabac oui"</p>
+                <div className="text-xs text-blue-600 bg-blue-100/50 p-2 rounded-lg font-medium">
+                  💡 Astuce : "Pas de tabac", "patient non tabagique" ou "tabac non" fonctionnent aussi.
+                </div>
+              </div>
+
+              <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100">
+                <strong className="text-emerald-800 block mb-2">🏥 Section 2 - Antécédents</strong>
+                <p className="text-slate-600 italic mb-3">"HTA oui, DT2 non, DYSLIPIDEMIE oui, AVC non"</p>
+                <div className="text-xs text-emerald-600 bg-emerald-100/50 p-2 rounded-lg font-medium">
+                  💡 Astuce : "Pas d'HTA" ou "patient non hypertendu" fonctionnent aussi.
+                </div>
+              </div>
+
+              <div className="bg-purple-50/50 p-5 rounded-2xl border border-purple-100">
+                <strong className="text-purple-800 block mb-2">🧪 Section 3 - Biologie</strong>
+                <p className="text-slate-600 italic mb-3">"Hémoglobine 13.5, globules blancs 7000, plaquettes 250000"</p>
+                <div className="text-xs text-purple-600 bg-purple-100/50 p-2 rounded-lg font-medium">
+                  💡 Astuce : Dictez uniquement les valeurs, sans les unités.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <PatientForm 
         info={patientInfo} 
