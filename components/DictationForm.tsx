@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { PlusCircle, MinusCircle, Send, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-react';
 import { AudioRecorder } from './AudioRecorder';
 import { PatientForm } from './PatientForm';
-import { PatientInfo, AudioData, AudioFormat, AppMode, UserCredentials } from '../types';
+import { PatientInfo, AudioData, AppMode, UserCredentials } from '../types';
 import { WEBHOOK_URLS } from '../config/webhooks';
 import { db } from '../config/firebase';
 import { doc, updateDoc, increment, setDoc } from 'firebase/firestore';
