@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusCircle, MinusCircle, Send, CheckCircle2, AlertTriangle, Info, ExternalLink, Mic, Volume2, PauseCircle, ChevronRight } from 'lucide-react';
+import { PlusCircle, MinusCircle, Send, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-react';
 import { AudioRecorder } from './AudioRecorder';
 import { PatientForm } from './PatientForm';
 import { PatientInfo, AudioData, AudioFormat, AppMode, UserCredentials, WebhookPayload } from '../types';

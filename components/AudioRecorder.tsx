@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Mic, Square, Pause, Play, Trash2, CheckCircle2, RotateCcw } from 'lucide-react';
+import { Mic, Square, Pause, Play, CheckCircle2, RotateCcw } from 'lucide-react';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { RecordingStatus } from '../types';
 import { formatTime } from '../utils/audioUtils';

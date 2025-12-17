@@ -26,7 +26,6 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
   const audioChunks = useRef<Blob[]>([]);
   const timerInterval = useRef<number | null>(null);
   const startTime = useRef<number>(0);
-  const pauseTime = useRef<number>(0);
   const totalPausedTime = useRef<number>(0);
   const audioPlayer = useRef<HTMLAudioElement | null>(null);
 
