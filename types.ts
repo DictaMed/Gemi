@@ -19,6 +19,8 @@ export interface UserCredentials {
 export interface UserStats {
   totalDictations: number;
   totalDMI: number;
+  totalDictationTime?: number; // En secondes
+  totalWords?: number; // Nombre de mots dans les DMI
   lastActivity: string; // ISO Date
   accountCreated?: string;
 }

@@ -28,32 +28,22 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        const result = reader.result as string;
-        const base64 = result.split(',')[1];
-        resolve(base64);
-      };
-      reader.onerror = error => reject(error);
-    });
-  };
-
-  const updateStats = async () => {
+  const updateStats = async (wordCount: number) => {
     if (user.uid) {
       try {
         const userRef = doc(db, 'users', user.uid);
         try {
           await updateDoc(userRef, {
             totalDMI: increment(1),
+            totalWords: increment(wordCount),
             lastActivity: new Date().toISOString()
           });
         } catch (e) {
            await setDoc(userRef, {
             totalDictations: 0,
+            totalDictationTime: 0,
             totalDMI: 1,
+            totalWords: wordCount,
             lastActivity: new Date().toISOString(),
             accountCreated: new Date().toISOString()
           }, { merge: true });
@@ -70,59 +60,39 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
     setIsSubmitting(true);
     setSubmitError(null);
 
+    // Calcul du nombre de mots
+    const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+
     try {
-      const timestamp = new Date().toISOString();
-      const promises = [];
+      const formData = new FormData();
 
-      // 1. Prepare Text Payload (if text exists)
+      // 1. Données Utilisateur (Obligatoire)
+      const userName = user.login.split('@')[0].replace('.', ' '); 
+      formData.append('nom_prénom_user', userName);
+      formData.append('email', user.login);
+
+      // 2. Texte DMI (si présent)
       if (text.trim()) {
-        const textPayload = {
-          mode: 'dmi_text',
-          user: { login: user.login },
-          text: text,
-          timestamp: timestamp
-        };
-        
-        promises.push(
-          fetch(WEBHOOK_URLS.DMI_TEXT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(textPayload)
-          }).then(res => {
-            if (!res.ok) throw new Error('Erreur envoi texte');
-            return res;
-          })
-        );
+        formData.append('Texte_DMI', text);
       }
 
-      // 2. Prepare Images Payload (if images exist)
-      if (images.length > 0) {
-        const base64Images = await Promise.all(images.map(fileToBase64));
-        const photosPayload = {
-          mode: 'dmi_photos',
-          user: { login: user.login },
-          images: base64Images,
-          timestamp: timestamp
-        };
+      // 3. Photos DMI (si présentes)
+      // On envoie les fichiers binaires directement
+      images.forEach((file, index) => {
+        // 'Photo_DMI' sera un tableau de fichiers dans n8n, ou n8n itérera dessus
+        // On donne un nom explicite pour chaque fichier
+        formData.append('Photo_DMI', file, `photo_${index + 1}_${file.name}`);
+      });
 
-        promises.push(
-          fetch(WEBHOOK_URLS.DMI_PHOTOS, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(photosPayload)
-          }).then(res => {
-            if (!res.ok) throw new Error('Erreur envoi photos');
-            return res;
-          })
-        );
-      }
+      // Envoi unique vers le Webhook DMI (On utilise l'URL TEXT par défaut qui gérera tout)
+      const response = await fetch(WEBHOOK_URLS.DMI_TEXT, {
+        method: 'POST',
+        body: formData // Le navigateur gère le Content-Type multipart/form-data
+      });
 
-      // Execute both requests concurrently
-      await Promise.all(promises);
+      if (!response.ok) throw new Error('Erreur envoi DMI');
 
-      // Mettre à jour les stats Firestore
-      await updateStats();
-
+      await updateStats(wordCount);
       setSubmitSuccess(true);
       
       setTimeout(() => {
@@ -133,7 +103,7 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
 
     } catch (error) {
       console.error(error);
-      setSubmitError("Échec de l'envoi (un ou plusieurs services indisponibles).");
+      setSubmitError("Échec de l'envoi (service indisponible).");
     } finally {
       setIsSubmitting(false);
     }

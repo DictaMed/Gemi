@@ -6,6 +6,7 @@ import { PatientInfo, AudioData, AudioFormat, AppMode, UserCredentials } from '.
 import { WEBHOOK_URLS } from '../config/webhooks';
 import { db } from '../config/firebase';
 import { doc, updateDoc, increment, setDoc } from 'firebase/firestore';
+import { mergeAudioBlobs } from '../utils/audioUtils';
 
 interface DictationFormProps {
   mode: AppMode;
@@ -14,7 +15,6 @@ interface DictationFormProps {
 
 export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
   const [patientInfo, setPatientInfo] = useState<PatientInfo>({ id: '', name: '' });
-  const [audioFormat] = useState<AudioFormat>(AudioFormat.WAV);
   const [showPart4, setShowPart4] = useState(false);
   const [blobs, setBlobs] = useState<AudioData>({ part1: null, part2: null, part3: null, part4: null });
   const [resetTrigger, setResetTrigger] = useState(0);
@@ -36,21 +36,22 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
 
   const isFormValid = validateForm();
 
-  const updateStats = async () => {
+  const updateStats = async (durationInSeconds: number) => {
     if (mode === AppMode.NORMAL && user.uid) {
       try {
         const userRef = doc(db, 'users', user.uid);
-        // On essaie d'update, si ça fail (doc n'existe pas), on le crée
         try {
           await updateDoc(userRef, {
             totalDictations: increment(1),
+            totalDictationTime: increment(durationInSeconds),
             lastActivity: new Date().toISOString()
           });
         } catch (e) {
-          // Si le document n'existe pas encore, on le crée
           await setDoc(userRef, {
             totalDictations: 1,
+            totalDictationTime: durationInSeconds,
             totalDMI: 0,
+            totalWords: 0,
             lastActivity: new Date().toISOString(),
             accountCreated: new Date().toISOString()
           }, { merge: true });
@@ -66,39 +67,47 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
     setIsSubmitting(true);
     setSubmitError(null);
 
+    let finalDuration = 0;
+
     try {
-      // Création d'un objet FormData pour l'envoi multipart/form-data
-      // Cela permet à n8n de recevoir les fichiers binaires directement
       const formData = new FormData();
 
-      // Ajout des métadonnées
-      formData.append('mode', mode);
-      formData.append('user_login', user.login);
-      formData.append('patient_id', patientInfo.id);
-      formData.append('patient_name', patientInfo.name);
-      formData.append('audio_format', audioFormat);
-      formData.append('timestamp', new Date().toISOString());
+      // 1. Données Utilisateur
+      const userName = user.login.split('@')[0].replace('.', ' '); 
+      formData.append('nom_prénom_user', userName);
+      formData.append('email', user.login);
 
-      // Ajout des fichiers audio (s'ils existent)
-      // Le 3ème argument est le nom du fichier qui apparaîtra dans n8n
-      if (blobs.part1) formData.append('partie_1', blobs.part1, `partie_1.${audioFormat}`);
-      if (blobs.part2) formData.append('partie_2', blobs.part2, `partie_2.${audioFormat}`);
-      if (blobs.part3) formData.append('partie_3', blobs.part3, `partie_3.${audioFormat}`);
-      if (blobs.part4) formData.append('partie_4', blobs.part4, `partie_4.${audioFormat}`);
+      // 2. Données Patient
+      formData.append('Num_Dossier', patientInfo.id);
+      formData.append('nom_Prénom_Patient', patientInfo.name);
+
+      // 3. Traitement Audio : Fusionner les parties
+      const partsToMerge = [blobs.part1, blobs.part2, blobs.part3, blobs.part4].filter((b): b is Blob => b !== null);
+      
+      if (partsToMerge.length > 0) {
+        try {
+          // Fusion des blobs audio en un seul fichier WAV
+          const { blob: mergedBlob, duration } = await mergeAudioBlobs(partsToMerge);
+          finalDuration = duration;
+          formData.append('fichier_audio', mergedBlob, 'audio_complet.wav');
+        } catch (err) {
+          console.error("Erreur lors de la fusion audio:", err);
+          throw new Error("Erreur technique lors de la fusion des fichiers audio.");
+        }
+      } else {
+        throw new Error("Aucun audio enregistré.");
+      }
 
       const targetUrl = mode === AppMode.NORMAL ? WEBHOOK_URLS.AUDIO_NORMAL : WEBHOOK_URLS.AUDIO_TEST;
       
       try {
         const response = await fetch(targetUrl, {
           method: 'POST',
-          // Note: Ne PAS définir 'Content-Type': 'multipart/form-data' manuellement.
-          // Le navigateur le fait automatiquement avec le boundary correct lorsqu'on passe un FormData.
           body: formData
         });
         if (!response.ok) throw new Error('Erreur serveur');
         
-        // Mise à jour des stats seulement si envoi réussi
-        await updateStats();
+        await updateStats(finalDuration);
 
       } catch (err) {
         console.error("Erreur d'envoi:", err);
@@ -115,8 +124,8 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 3000);
 
-    } catch (error) {
-      setSubmitError("Échec de connexion au serveur.");
+    } catch (error: any) {
+      setSubmitError(error.message || "Échec de connexion au serveur.");
     } finally {
       setIsSubmitting(false);
     }
@@ -129,7 +138,7 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
           <CheckCircle2 size={48} className="text-emerald-500 animate-bounce" />
         </div>
         <h2 className="text-3xl font-extrabold text-slate-800 mb-3 tracking-tight">Transmission Réussie</h2>
-        <p className="text-slate-500 text-lg max-w-md font-medium">Les données ont été cryptées et transférées au serveur sécurisé.</p>
+        <p className="text-slate-500 text-lg max-w-md font-medium">Les données ont été fusionnées, cryptées et transférées au serveur.</p>
         <div className="mt-8 w-64 bg-slate-200 rounded-full h-1.5 overflow-hidden">
            <div className="h-full bg-emerald-500 animate-[pulse_2s_ease-in-out_infinite] w-full"></div>
         </div>
@@ -149,7 +158,7 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
              ? <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-md font-bold uppercase">Mode Test</span> 
              : <span className="bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded-md font-bold uppercase">Production</span>
            }
-           Enregistrement sécurisé multi-pistes
+           Enregistrement sécurisé multi-pistes (Fusion automatique)
         </p>
       </div>
 
@@ -301,7 +310,7 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Transmission...
+                  Fusion & Envoi...
                 </>
               ) : (
                 <>

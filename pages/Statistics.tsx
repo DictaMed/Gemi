@@ -8,10 +8,10 @@ import {
   FolderPlus, 
   Clock, 
   TrendingUp, 
-  Award, 
   Calendar,
   ArrowUpRight,
-  Zap
+  Zap,
+  FileText
 } from 'lucide-react';
 
 interface StatisticsProps {
@@ -35,6 +35,8 @@ export const Statistics: React.FC<StatisticsProps> = ({ user }) => {
           setStats({
             totalDictations: 0,
             totalDMI: 0,
+            totalDictationTime: 0,
+            totalWords: 0,
             lastActivity: new Date().toISOString()
           });
         }
@@ -59,35 +61,10 @@ export const Statistics: React.FC<StatisticsProps> = ({ user }) => {
     );
   }
 
-  // Calculs dérivés
-  const totalDocs = (stats?.totalDictations || 0) + (stats?.totalDMI || 0);
-  // Estimation : 1 dictée gagne environ 10 minutes de frappe
-  const timeSavedMinutes = (stats?.totalDictations || 0) * 10 + (stats?.totalDMI || 0) * 5;
-  const timeSavedHours = Math.floor(timeSavedMinutes / 60);
-  const timeSavedRest = timeSavedMinutes % 60;
-  
-  // Niveaux d'utilisateur
-  let userLevel = "Débutant";
-  let progressToNext = 0;
-  let levelColor = "text-slate-500";
-  let levelBg = "bg-slate-100";
-  
-  if (totalDocs > 100) {
-    userLevel = "Expert Or";
-    progressToNext = 100;
-    levelColor = "text-amber-600";
-    levelBg = "bg-amber-100";
-  } else if (totalDocs > 50) {
-    userLevel = "Confirmé Argent";
-    progressToNext = ((totalDocs - 50) / 50) * 100;
-    levelColor = "text-slate-600";
-    levelBg = "bg-slate-200";
-  } else {
-    userLevel = "Praticien Bronze";
-    progressToNext = (totalDocs / 50) * 100;
-    levelColor = "text-orange-600";
-    levelBg = "bg-orange-100";
-  }
+  // Formatage du temps de dictée (secondes -> Hh mm)
+  const totalSeconds = stats?.totalDictationTime || 0;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
 
   return (
     <div className="max-w-6xl mx-auto pb-24 animate-fade-in">
@@ -97,9 +74,6 @@ export const Statistics: React.FC<StatisticsProps> = ({ user }) => {
         <div>
           <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
             Tableau de Bord
-            <span className={`text-xs px-3 py-1 rounded-full uppercase tracking-widest font-bold ${levelBg} ${levelColor}`}>
-              {userLevel}
-            </span>
           </h2>
           <p className="text-slate-500 mt-2 font-medium">
             Bienvenue Dr. {user.login.split('@')[0]}
@@ -125,7 +99,7 @@ export const Statistics: React.FC<StatisticsProps> = ({ user }) => {
               </div>
               <div className="flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
                 <ArrowUpRight size={14} className="mr-1" />
-                +12%
+                Actif
               </div>
             </div>
             <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Dictées Réalisées</p>
@@ -141,17 +115,13 @@ export const Statistics: React.FC<StatisticsProps> = ({ user }) => {
               <div className="bg-emerald-100 p-2.5 rounded-xl text-emerald-600">
                 <FolderPlus size={22} strokeWidth={2.5} />
               </div>
-              <div className="flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
-                <ArrowUpRight size={14} className="mr-1" />
-                +5%
-              </div>
             </div>
             <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Dossiers DMI</p>
             <h3 className="text-3xl font-extrabold text-slate-800">{stats?.totalDMI || 0}</h3>
           </div>
         </div>
 
-        {/* Card 3: Time Saved */}
+        {/* Card 3: Temps Dicté Réel */}
         <div className="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl p-6 shadow-lg shadow-indigo-200 text-white relative overflow-hidden group">
           <div className="absolute -right-6 -bottom-6 text-white opacity-10 transform rotate-12 group-hover:scale-110 transition-transform">
              <Clock size={100} />
@@ -163,39 +133,30 @@ export const Statistics: React.FC<StatisticsProps> = ({ user }) => {
               </div>
               <div className="flex items-center text-xs font-bold text-white/90 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10">
                 <Zap size={14} className="mr-1 fill-yellow-400 text-yellow-400" />
-                Productivité
+                Live
               </div>
             </div>
-            <p className="text-indigo-100 text-xs font-bold uppercase tracking-wider mb-1">Temps Économisé</p>
+            <p className="text-indigo-100 text-xs font-bold uppercase tracking-wider mb-1">Temps de dictée effectuée</p>
             <h3 className="text-3xl font-extrabold flex items-baseline gap-1">
-              {timeSavedHours} <span className="text-base font-medium opacity-80">h</span>
-              {timeSavedRest > 0 && <>{timeSavedRest} <span className="text-base font-medium opacity-80">min</span></>}
+              {hours} <span className="text-base font-medium opacity-80">h</span>
+              {minutes} <span className="text-base font-medium opacity-80">min</span>
             </h3>
           </div>
         </div>
 
-        {/* Card 4: Level Progress */}
+        {/* Card 4: Nombre de mots */}
         <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all">
           <div className="flex justify-between items-start mb-4">
-            <div className={`${levelBg} p-2.5 rounded-xl ${levelColor}`}>
-              <Award size={22} strokeWidth={2.5} />
-            </div>
-            <span className="text-xs font-bold text-slate-400">Prochain niveau</span>
-          </div>
-          <div className="mb-2">
-            <div className="flex justify-between text-xs font-bold mb-1.5">
-               <span className="text-slate-700">{userLevel}</span>
-               <span className="text-emerald-600">{Math.round(progressToNext)}%</span>
-            </div>
-            <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-               <div 
-                  className="bg-emerald-500 h-2.5 rounded-full transition-all duration-1000 ease-out" 
-                  style={{ width: `${progressToNext}%` }}
-               ></div>
+            <div className="bg-orange-100 p-2.5 rounded-xl text-orange-600">
+              <FileText size={22} strokeWidth={2.5} />
             </div>
           </div>
+          <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Mots Transcrits/Envoyés</p>
+          <h3 className="text-3xl font-extrabold text-slate-800">
+            {(stats?.totalWords || 0).toLocaleString('fr-FR')}
+          </h3>
           <p className="text-slate-400 text-[10px] mt-2">
-            Réalisez plus de dictées pour débloquer le badge Or.
+            Via les formulaires DMI textuels
           </p>
         </div>
       </div>

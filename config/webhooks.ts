@@ -12,7 +12,7 @@ export const WEBHOOK_URLS = {
   AUDIO_NORMAL: 'https://n8n.srv1104707.hstgr.cloud/webhook/Audio',
   
   // Mode Test : Simulation
-  AUDIO_TEST: 'https://n8n.srv1104707.hstgr.cloud/webhook-test/Audio',
+  AUDIO_TEST: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed',
 
   // ---------------------------------------------------------
   // SECTION DMI (Dossier Médical Informatisé)
