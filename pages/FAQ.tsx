@@ -51,7 +51,7 @@ export const FAQ: React.FC = () => {
         <div className="inline-block p-4 bg-cyan-50 rounded-full mb-4 shadow-sm">
             <HelpCircle size={40} className="text-cyan-600" />
         </div>
-        <h2 className="text-3xl font-extrabold text-slate-800">Centre d'Aide</h2>
+        <h2 className="text-3xl font-extrabold text-slate-800">FAQ</h2>
         <p className="text-slate-500 mt-2 font-medium">Tout savoir sur l'utilisation de DictaMed</p>
       </div>
 

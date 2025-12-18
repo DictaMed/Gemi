@@ -183,7 +183,7 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
             {isSubmitting ? 'Envoi...' : (
               <>
                 <Send size={24} className="mr-3" strokeWidth={3} />
-                envoyer les données
+                Envoyer
               </>
             )}
           </button>

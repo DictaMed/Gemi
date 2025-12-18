@@ -31,7 +31,7 @@ export const Guide: React.FC = () => {
             </li>
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 bg-rose-400 rounded-full mt-2.5 flex-shrink-0"></span>
-              <span>Source d'erreurs fréquente (3 à 5% d'erreurs de saisie).</span>
+              <span>Source d'erreurs fréquente.</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 bg-rose-400 rounded-full mt-2.5 flex-shrink-0"></span>
@@ -101,14 +101,13 @@ export const Guide: React.FC = () => {
           <div className="bg-blue-50 p-3 rounded-2xl">
             <ListOrdered size={24} className="text-blue-600" />
           </div>
-          <h3 className="text-xl font-bold text-slate-800">Votre processus en 7 étapes</h3>
+          <h3 className="text-xl font-bold text-slate-800">Votre processus en 6 étapes</h3>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
           {[
             { title: "Définition", desc: "Fixer les variables à collecter" },
             { title: "Template", desc: "Envoyer le fichier SPSS modèle" },
-            { title: "Accès", desc: "Recevoir vos identifiants sécurisés" },
             { title: "Organisation", desc: "Plan de travail structuré" },
             { title: "Setup", desc: "Création du Google Sheet personnalisé" },
             { title: "Dictée", desc: "Dicter les données patient par patient" },
@@ -117,7 +116,7 @@ export const Guide: React.FC = () => {
             <div key={i} className={`
               rounded-2xl p-6 border flex flex-col h-full
               ${step.highlight 
-                ? 'bg-gradient-to-br from-blue-600 to-teal-500 text-white border-transparent shadow-lg shadow-blue-200 col-span-1 md:col-span-2 lg:col-span-2' 
+                ? 'bg-gradient-to-br from-blue-600 to-teal-500 text-white border-transparent shadow-lg shadow-blue-200 col-span-1 md:col-span-1 lg:col-span-1' 
                 : 'bg-white border-slate-200 text-slate-600 shadow-sm'
               }
             `}>
@@ -125,7 +124,7 @@ export const Guide: React.FC = () => {
                 <span className={`text-sm font-bold uppercase tracking-wider ${step.highlight ? 'text-blue-100' : 'text-slate-400'}`}>
                   Étape {i + 1}
                 </span>
-                {i < 6 && !step.highlight && <ArrowRight size={16} className="text-slate-300" />}
+                {i < 5 && !step.highlight && <ArrowRight size={16} className="text-slate-300" />}
               </div>
               <h4 className={`text-lg font-bold mb-2 ${step.highlight ? 'text-white' : 'text-slate-800'}`}>{step.title}</h4>
               <p className={`font-medium leading-relaxed ${step.highlight ? 'text-blue-50' : 'text-slate-500'}`}>{step.desc}</p>

@@ -21,9 +21,6 @@ export const PatientForm: React.FC<PatientFormProps> = ({ info, onChange, disabl
         </div>
         <div>
           <h3 className="text-lg font-bold text-slate-800 tracking-tight">Identification Patient</h3>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-            {isTestMode ? "Mode Démonstration" : "Données Administratives"}
-          </p>
         </div>
       </div>
 

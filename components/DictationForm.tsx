@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusCircle, MinusCircle, Send, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-react';
+import { PlusCircle, MinusCircle, Send, CheckCircle2, AlertTriangle, ExternalLink, Info, Lightbulb, Beaker } from 'lucide-react';
 import { AudioRecorder } from './AudioRecorder';
 import { PatientForm } from './PatientForm';
 import { PatientInfo, AudioData, AppMode, UserCredentials } from '../types';
@@ -129,42 +129,90 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
 
   return (
     <div className="max-w-4xl mx-auto pb-44">
-      <div className="mb-10 text-center sm:text-left">
-        <h2 className="text-4xl font-black text-slate-900 tracking-tight">
-          {mode === AppMode.TEST ? 'Démonstration DictaMed' : 'Nouvelle Dictée'}
-        </h2>
-        <p className="text-slate-500 font-bold mt-2 flex items-center justify-center sm:justify-start gap-2">
-           {mode === AppMode.TEST 
-             ? <span className="bg-blue-100 text-blue-700 text-xs px-2.5 py-1 rounded-lg font-black uppercase tracking-wider">Mode Test</span> 
-             : <span className="bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-lg font-black uppercase tracking-wider">Production</span>
-           }
-           Saisie vocale multi-pistes optimisée
-        </p>
-      </div>
-
-      {mode === AppMode.TEST && (
-        <div className="bg-gradient-to-br from-blue-600 to-emerald-600 rounded-3xl p-1 shadow-2xl shadow-blue-200 mb-10 overflow-hidden">
-           <div className="bg-white/10 backdrop-blur-md p-8 flex flex-col md:flex-row items-center justify-between gap-6 text-white">
-            <div>
-              <h3 className="text-2xl font-black flex items-center gap-3">
-                👋 Guide de Démonstration
+      {mode === AppMode.TEST ? (
+        <div className="mb-10 text-center sm:text-left">
+          <h2 className="text-4xl font-black text-slate-900 tracking-tight">Démonstration DictaMed</h2>
+          <div className="mt-8 space-y-6">
+            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+              <h3 className="text-xl font-black text-slate-800 flex items-center gap-3 mb-6">
+                <div className="bg-blue-100 p-2 rounded-xl text-blue-600"><Info size={24} /></div>
+                📝 Consignes d'utilisation
               </h3>
-              <p className="text-blue-50 text-base mt-2 max-w-lg font-bold leading-relaxed opacity-90">
-                Dictez les variables indiquées pour tester la reconnaissance automatique. Vos résultats s'affichent instantanément dans le Google Sheet.
-              </p>
+              <ul className="space-y-4 text-slate-600 font-bold">
+                <li className="flex items-start gap-3">
+                  <span className="bg-blue-50 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">1</span>
+                  <span>Autorisez l'accès au microphone quand le navigateur vous le demande 🎤</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="bg-blue-50 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">2</span>
+                  <span>Parlez à haute voix, clairement et lentement 🗣️</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="bg-blue-50 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">3</span>
+                  <span>Privilégiez un environnement calme sans bruit de fond 🔇</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="bg-blue-50 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">4</span>
+                  <span>Marquez une courte pause entre chaque valeur dictée ⏸️</span>
+                </li>
+              </ul>
             </div>
-            <a 
-              href="https://docs.google.com/spreadsheets/d/1ReZHjndHc6o8O1bx1OfZXnZ8HWt8nLSo2X7IS6rcZXE/edit?usp=sharing" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-white text-emerald-700 px-6 py-4 rounded-2xl font-black text-base flex items-center shadow-2xl hover:bg-emerald-50 transition-all hover:scale-105"
-            >
-              <ExternalLink size={20} className="mr-2" />
-              Consulter le Google Sheet
-            </a>
-           </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200">
+                <h4 className="font-black text-slate-800 flex items-center gap-2 mb-3 text-sm">
+                  <Beaker size={18} className="text-indigo-500" />
+                  Section 1 : Clinique
+                </h4>
+                <p className="text-xs text-slate-500 font-bold mb-3 italic">"Âge 45 ans, sexe masculin, BMI 28, tabac oui"</p>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 flex items-start gap-2">
+                  <Lightbulb size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-[10px] text-slate-400 font-bold uppercase leading-relaxed">Astuce: Dites "Pas de tabac" ou "tabac non"</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200">
+                <h4 className="font-black text-slate-800 flex items-center gap-2 mb-3 text-sm">
+                  <Beaker size={18} className="text-indigo-500" />
+                  Section 2 : Antécédents
+                </h4>
+                <p className="text-xs text-slate-500 font-bold mb-3 italic">"HTA oui, DT2 non, DYSLIPIDEMIE oui, AVC non"</p>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 flex items-start gap-2">
+                  <Lightbulb size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-[10px] text-slate-400 font-bold uppercase leading-relaxed">Astuce: Dites "patient non hypertendu" etc</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200">
+                <h4 className="font-black text-slate-800 flex items-center gap-2 mb-3 text-sm">
+                  <Beaker size={18} className="text-indigo-500" />
+                  Section 3 : Biologie
+                </h4>
+                <p className="text-xs text-slate-500 font-bold mb-3 italic">"Hémoglobine 13.5, globules blancs 7000, plaquettes 250000"</p>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 flex items-start gap-2">
+                  <Lightbulb size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-[10px] text-slate-400 font-bold uppercase leading-relaxed">Astuce: Dictez les valeurs sans les unités</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-emerald-600 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 text-white">
+              <p className="text-white text-sm font-black leading-relaxed">
+                Les résultats s'affichent instantanément dans le Google Sheet public.
+              </p>
+              <a 
+                href="https://docs.google.com/spreadsheets/d/1ReZHjndHc6o8O1bx1OfZXnZ8HWt8nLSo2X7IS6rcZXE/edit?usp=sharing" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="bg-white text-emerald-700 px-6 py-4 rounded-2xl font-black text-base flex items-center shadow-2xl hover:bg-emerald-50 transition-all hover:scale-105"
+              >
+                <ExternalLink size={20} className="mr-2" />
+                Voir le résultat
+              </a>
+            </div>
+          </div>
         </div>
-      )}
+      ) : null}
 
       <PatientForm 
         info={patientInfo} 
@@ -257,7 +305,7 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
              <div className="flex items-center gap-2 mt-1">
                <div className={`w-2.5 h-2.5 rounded-full ${isFormValid ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}></div>
                <span className={`text-sm font-black ${isFormValid ? 'text-slate-800' : 'text-slate-400'}`}>
-                 {isFormValid ? 'Données prêtes' : 'Dossier incomplet'}
+                 {isFormValid ? 'Données prêtes' : 'données incomplètes'}
                </span>
              </div>
           </div>
@@ -294,7 +342,7 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
               ) : (
                 <>
                   <Send size={22} className="mr-3" strokeWidth={3} />
-                  envoyer les données
+                  Envoyer
                 </>
               )}
             </button>

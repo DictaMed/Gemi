@@ -53,7 +53,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
             <Stethoscope className="text-emerald-500" size={40} strokeWidth={2} />
           </div>
           <h2 className="text-3xl font-black tracking-tight mb-3">
-            <span className="text-blue-600">Se connecter à Dicta</span><span className="text-emerald-600">Med</span>
+            <span className="text-black">Se connecter à </span>
+            <span className="text-blue-600">Dicta</span><span className="text-emerald-600">Med</span>
           </h2>
           <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider">
              <ShieldCheck size={14} className="text-emerald-500" />
@@ -73,7 +74,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
                 className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-slate-800 font-bold placeholder:text-slate-400/70 transition-all outline-none"
-                placeholder="Ex: dr.monastir"
+                placeholder="Dr Flen"
               />
             </div>
           </div>
