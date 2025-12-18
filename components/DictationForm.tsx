@@ -71,11 +71,15 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
 
     try {
       const formData = new FormData();
+      // Extraction du nom pour affichage (ex: jean.dupont -> jean dupont)
       const userName = user.login.split('@')[0].replace('.', ' '); 
       
-      // Clés normalisées (sans accents, minuscules) pour compatibilité n8n
+      // Envoi des métadonnées
       formData.append('nom_prenom_user', userName);
+      
+      // CRITIQUE : Envoi de l'email exact de l'utilisateur connecté
       formData.append('email', user.login);
+      
       formData.append('num_dossier', patientInfo.id);
       formData.append('nom_prenom_patient', patientInfo.name);
 
