@@ -1,6 +1,6 @@
 /**
  * Configuration centrale des Webhooks.
- * Modifiez les URLs ci-dessous pour changer les destinations des données.
+ * Ce fichier est l'unique source de vérité pour les liens de destination des données.
  */
 
 export const WEBHOOK_URLS = {
@@ -18,11 +18,6 @@ export const WEBHOOK_URLS = {
   // SECTION DMI (Dossier Médical Informatisé)
   // ---------------------------------------------------------
 
-  // Webhook pour le TEXTE (Observations, comptes rendus)
-  // TODO: Remplacer par l'URL définitive une fois précisée
-  DMI_TEXT: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed_Text_Placeholder',
-
-  // Webhook pour les PHOTOS
-  // TODO: Remplacer par l'URL définitive une fois précisée
-  DMI_PHOTOS: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed_Photos_Placeholder',
+  // Webhook unique pour l'envoi du formulaire DMI (gère Texte + Photos en multipart)
+  DMI_SUBMISSION: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed_DMI',
 };

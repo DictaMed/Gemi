@@ -72,10 +72,12 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
     try {
       const formData = new FormData();
       const userName = user.login.split('@')[0].replace('.', ' '); 
-      formData.append('nom_prénom_user', userName);
+      
+      // Clés normalisées (sans accents, minuscules) pour compatibilité n8n
+      formData.append('nom_prenom_user', userName);
       formData.append('email', user.login);
-      formData.append('Num_Dossier', patientInfo.id);
-      formData.append('nom_Prénom_Patient', patientInfo.name);
+      formData.append('num_dossier', patientInfo.id);
+      formData.append('nom_prenom_patient', patientInfo.name);
 
       const partsToMerge = [blobs.part1, blobs.part2, blobs.part3, blobs.part4].filter((b): b is Blob => b !== null);
       

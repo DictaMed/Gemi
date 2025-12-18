@@ -65,13 +65,16 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
     try {
       const formData = new FormData();
       const userName = user.login.split('@')[0].replace('.', ' '); 
-      formData.append('nom_prénom_user', userName);
+      
+      // Clé normalisée (sans accent)
+      formData.append('nom_prenom_user', userName);
       formData.append('email', user.login);
 
       if (text.trim()) formData.append('Texte_DMI', text);
       images.forEach((file, index) => formData.append('Photo_DMI', file, `photo_${index + 1}_${file.name}`));
 
-      const response = await fetch(WEBHOOK_URLS.DMI_TEXT, { method: 'POST', body: formData });
+      // Utilisation de la clé centralisée mise à jour
+      const response = await fetch(WEBHOOK_URLS.DMI_SUBMISSION, { method: 'POST', body: formData });
       if (!response.ok) throw new Error('Erreur envoi');
 
       await updateStats(wordCount);
