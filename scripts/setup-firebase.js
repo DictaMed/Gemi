@@ -1,8 +1,8 @@
 /**
  * SCRIPT D'INITIALISATION FIREBASE (Terminal VS Code)
- * Ce script permet de créer manuellement la structure d'un utilisateur 
+ * Ce script permet de créer manuellement la structure d'un utilisateur
  * pour les statistiques.
- * 
+ *
  * Instructions:
  * 1. Installez firebase-admin: npm install firebase-admin
  * 2. Téléchargez votre clé de service (Paramètres Projet > Comptes de service)
@@ -10,9 +10,14 @@
  * 4. Lancez: node scripts/setup-firebase.js
  */
 
-/*
-const admin = require('firebase-admin');
-const serviceAccount = require("../serviceAccountKey.json");
+import admin from 'firebase-admin';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const serviceAccount = JSON.parse(readFileSync(join(__dirname, 'serviceAccountKey.json'), 'utf8'));
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -37,8 +42,13 @@ async function setupPraticien(uid, email) {
   console.log(`✅ Structure initialisée pour Dr. ${email}`);
 }
 
-// REMPLACER PAR VOS DONNÉES REELLES POUR TESTER
-// setupPraticien('VOTRE_UID_FIREBASE', 'votre.email@exemple.com');
-*/
-
-console.log("📌 Script setup-firebase.js prêt. Décommentez le code et ajoutez votre serviceAccountKey.json pour l'utiliser.");
+// Exécution de l'initialisation
+setupPraticien('gtaMfFify5QOZNgNOExlIlVfhOX2', 'akio963@gmail.com')
+  .then(() => {
+    console.log('✅ Initialisation terminée avec succès!');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('❌ Erreur lors de l\'initialisation:', error);
+    process.exit(1);
+  });

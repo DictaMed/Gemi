@@ -8,8 +8,9 @@ import { FAQ } from './pages/FAQ';
 import { Guide } from './pages/Guide';
 import { Contact } from './pages/Contact';
 import { AppMode, UserCredentials } from './types';
-import { auth } from './config/firebase';
+import { auth, db } from './config/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 function App() {
   const [currentTab, setCurrentTab] = useState('normal');
@@ -17,13 +18,43 @@ function App() {
   const [loadingAuth, setLoadingAuth] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // 1. Définir l'état local de l'utilisateur
         setUser({
           login: firebaseUser.email || 'Utilisateur Google',
           accessCode: 'GOOGLE_SECURED',
           uid: firebaseUser.uid 
         });
+
+        // 2. Initialiser automatiquement la base de données pour cet utilisateur
+        try {
+          const userRef = doc(db, 'users', firebaseUser.uid);
+          const userSnap = await getDoc(userRef);
+
+          if (!userSnap.exists()) {
+            // Création du document initial si c'est la première connexion
+            await setDoc(userRef, {
+              login: firebaseUser.email,
+              totalDictations: 0,
+              totalDMI: 0,
+              totalDictationTime: 0,
+              totalWords: 0,
+              lastActivity: new Date().toISOString(),
+              accountCreated: new Date().toISOString(),
+              isPraticien: true
+            });
+            console.log("Base de données utilisateur initialisée.");
+          } else {
+            // Mise à jour de la dernière activité si l'utilisateur existe déjà
+            await updateDoc(userRef, {
+              lastActivity: new Date().toISOString()
+            });
+          }
+        } catch (err) {
+          console.error("Erreur auto-initialisation DB:", err);
+        }
+
       } else {
         setUser(prev => (prev?.accessCode === 'GOOGLE_SECURED' ? null : prev));
       }

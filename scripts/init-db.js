@@ -6,7 +6,7 @@
  * Vous devrez ajouter votre fichier serviceAccountKey.json pour l'utiliser.
  */
 
-/*
+
 const admin = require('firebase-admin');
 const serviceAccount = require("./serviceAccountKey.json");
 
@@ -33,6 +33,6 @@ async function initUser(uid, login) {
 
 // Exemple d'usage:
 // initUser('LE_UID_DU_DOCTEUR', 'dr.monastir@dictamed.tn');
-*/
+
 
 console.log("Fichier script créé. Pour l'utiliser, configurez firebase-admin et vos clés de service.");
