@@ -17,45 +17,52 @@ function App() {
   const [user, setUser] = useState<UserCredentials | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
 
+  // Fonction centralisée pour initialiser ou mettre à jour l'utilisateur en BDD
+  const syncUserWithDb = async (uid: string, emailOrLogin: string) => {
+    try {
+      const userRef = doc(db, 'users', uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        // Création du document initial
+        await setDoc(userRef, {
+          login: emailOrLogin,
+          totalDictations: 0,
+          totalDMI: 0,
+          totalDictationTime: 0,
+          totalWords: 0,
+          lastActivity: new Date().toISOString(),
+          accountCreated: new Date().toISOString(),
+          isPraticien: true
+        });
+        console.log("✅ BDD : Profil utilisateur créé pour", emailOrLogin);
+      } else {
+        // Mise à jour de la dernière activité
+        await updateDoc(userRef, {
+          lastActivity: new Date().toISOString()
+        });
+        console.log("✅ BDD : Profil mis à jour pour", emailOrLogin);
+      }
+    } catch (err) {
+      console.error("❌ Erreur BDD (vérifiez les règles de sécurité Firestore) :", err);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // 1. Définir l'état local de l'utilisateur
+        // 1. Définir l'état local de l'utilisateur Google
         setUser({
           login: firebaseUser.email || 'Utilisateur Google',
           accessCode: 'GOOGLE_SECURED',
           uid: firebaseUser.uid 
         });
 
-        // 2. Initialiser automatiquement la base de données pour cet utilisateur
-        try {
-          const userRef = doc(db, 'users', firebaseUser.uid);
-          const userSnap = await getDoc(userRef);
-
-          if (!userSnap.exists()) {
-            // Création du document initial si c'est la première connexion
-            await setDoc(userRef, {
-              login: firebaseUser.email,
-              totalDictations: 0,
-              totalDMI: 0,
-              totalDictationTime: 0,
-              totalWords: 0,
-              lastActivity: new Date().toISOString(),
-              accountCreated: new Date().toISOString(),
-              isPraticien: true
-            });
-            console.log("Base de données utilisateur initialisée.");
-          } else {
-            // Mise à jour de la dernière activité si l'utilisateur existe déjà
-            await updateDoc(userRef, {
-              lastActivity: new Date().toISOString()
-            });
-          }
-        } catch (err) {
-          console.error("Erreur auto-initialisation DB:", err);
-        }
+        // 2. Sync BDD
+        await syncUserWithDb(firebaseUser.uid, firebaseUser.email || 'Google User');
 
       } else {
+        // Si on n'est pas connecté via Firebase Auth, on vérifie si c'était une connexion manuelle
         setUser(prev => (prev?.accessCode === 'GOOGLE_SECURED' ? null : prev));
       }
       setLoadingAuth(false);
@@ -64,8 +71,21 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  const handleManualLogin = (creds: UserCredentials) => {
-    setUser(creds);
+  const handleManualLogin = async (creds: UserCredentials) => {
+    // CORRECTION MAJEURE : Générer un UID pour les utilisateurs manuels
+    // On nettoie le login pour créer un ID valide (ex: dr.flen -> manual_dr_flen)
+    const sanitizedId = creds.login.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+    const generatedUid = `manual_${sanitizedId}`;
+
+    const userWithUid = { 
+      ...creds, 
+      uid: generatedUid 
+    };
+
+    setUser(userWithUid);
+    
+    // Initialiser immédiatement la BDD pour cet utilisateur manuel
+    await syncUserWithDb(generatedUid, creds.login);
   };
 
   const handleLogout = async () => {
@@ -104,8 +124,6 @@ function App() {
         return <Statistics user={user} />;
       
       case 'test':
-        // CORRECTION ICI : Si l'utilisateur est connecté, on utilise ses infos.
-        // Sinon, on utilise un compte démo avec un format email valide pour que le parsing fonctionne.
         const testUser = user || { login: 'demo.medecin@dictamed.com', accessCode: '0000' };
         return <DictationForm mode={AppMode.TEST} user={testUser} />;
       

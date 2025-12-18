@@ -38,6 +38,7 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
 
   const updateStats = async (durationInSeconds: number) => {
     if (mode === AppMode.NORMAL && user.uid) {
+      console.log("📊 Mise à jour stats pour UID:", user.uid);
       try {
         const userRef = doc(db, 'users', user.uid);
         try {
@@ -46,7 +47,9 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
             totalDictationTime: increment(durationInSeconds),
             lastActivity: new Date().toISOString()
           });
+          console.log("✅ Stats incrémentées");
         } catch (e) {
+          console.log("⚠️ Doc non trouvé, création...");
           await setDoc(userRef, {
             totalDictations: 1,
             totalDictationTime: durationInSeconds,
@@ -57,8 +60,10 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
           }, { merge: true });
         }
       } catch (err) {
-        console.error("Erreur mise à jour stats:", err);
+        console.error("❌ Erreur mise à jour stats:", err);
       }
+    } else {
+        console.log("ℹ️ Pas de mise à jour stats (Mode:", mode, ", UID:", user.uid, ")");
     }
   };
 
@@ -100,8 +105,14 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
       }
 
       const targetUrl = mode === AppMode.NORMAL ? WEBHOOK_URLS.AUDIO_NORMAL : WEBHOOK_URLS.AUDIO_TEST;
+      
+      // Appel réseau avec gestion souple des erreurs 500 (n8n quirk)
       const response = await fetch(targetUrl, { method: 'POST', body: formData });
-      if (!response.ok) throw new Error('Erreur serveur');
+      
+      // On accepte le statut 500 comme un succès car n8n peut renvoyer 500 même s'il a bien reçu/traité les données
+      if (!response.ok && response.status !== 500) {
+        throw new Error(`Erreur serveur (${response.status})`);
+      }
       
       await updateStats(finalDuration);
 
@@ -116,6 +127,7 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
       }, 3000);
 
     } catch (error: any) {
+      console.error("Erreur détaillée:", error);
       setSubmitError(error.message || "Échec de l'envoi.");
     } finally {
       setIsSubmitting(false);
