@@ -1,7 +1,0 @@
-{
-  "name": "DictaMed Frontend",
-  "description": "A secure, frontend-only medical dictation application designed for healthcare professionals to capture and transmit audio data via webhooks.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
-}
