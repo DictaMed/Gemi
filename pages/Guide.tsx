@@ -3,8 +3,8 @@ import { BookOpen, AlertTriangle, Lightbulb, Mic, ListOrdered, ArrowRight, Check
 
 export const Guide: React.FC = () => {
   return (
-    <div className="max-w-5xl mx-auto p-4 sm:p-6 pb-24">
-      <div className="text-center mb-12">
+    <div className="max-w-5xl mx-auto p-4 sm:p-6 pb-24 relative">
+      <div className="text-center mb-12 relative z-10">
         <div className="inline-block p-4 bg-blue-50 rounded-full mb-4 shadow-sm">
             <BookOpen size={40} className="text-blue-600" />
         </div>
@@ -12,7 +12,7 @@ export const Guide: React.FC = () => {
         <p className="text-slate-500 mt-2 font-medium">Comprendre la méthode DictaMed et optimiser vos dictées</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 relative z-10">
         {/* Problématique */}
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-rose-100 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-5">
@@ -62,14 +62,14 @@ export const Guide: React.FC = () => {
             </li>
             <li className="flex items-start gap-3">
               <CheckCircle2 size={18} className="text-emerald-500 mt-1 flex-shrink-0" />
-              <span><strong>Gain de temps : 70%</strong> avec une précision &gt; 95%.</span>
+              <span><strong>Gain de temps : 70%</strong> avec une précision optimale.</span>
             </li>
           </ul>
         </div>
       </div>
 
       {/* Conseils */}
-      <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 mb-12">
+      <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 mb-12 relative z-10">
         <div className="flex items-center gap-3 mb-6">
           <div className="bg-blue-50 p-3 rounded-2xl">
             <Mic size={24} className="text-blue-600" />
@@ -95,20 +95,19 @@ export const Guide: React.FC = () => {
         </div>
       </div>
 
-      {/* Processus */}
-      <div className="relative">
+      {/* Processus - Étape 3 supprimée */}
+      <div className="relative z-10">
         <div className="flex items-center gap-3 mb-8">
           <div className="bg-blue-50 p-3 rounded-2xl">
             <ListOrdered size={24} className="text-blue-600" />
           </div>
-          <h3 className="text-xl font-bold text-slate-800">Votre processus en 6 étapes</h3>
+          <h3 className="text-xl font-bold text-slate-800">Votre processus en 5 étapes</h3>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
           {[
             { title: "Définition", desc: "Fixer les variables à collecter" },
             { title: "Template", desc: "Envoyer le fichier SPSS modèle" },
-            { title: "Organisation", desc: "Plan de travail structuré" },
             { title: "Setup", desc: "Création du Google Sheet personnalisé" },
             { title: "Dictée", desc: "Dicter les données patient par patient" },
             { title: "Livrable", desc: "Obtenir le fichier SPSS prêt pour analyse", highlight: true },
@@ -116,7 +115,7 @@ export const Guide: React.FC = () => {
             <div key={i} className={`
               rounded-2xl p-6 border flex flex-col h-full
               ${step.highlight 
-                ? 'bg-gradient-to-br from-blue-600 to-teal-500 text-white border-transparent shadow-lg shadow-blue-200 col-span-1 md:col-span-1 lg:col-span-1' 
+                ? 'bg-gradient-to-br from-blue-600 to-teal-500 text-white border-transparent shadow-lg shadow-blue-200' 
                 : 'bg-white border-slate-200 text-slate-600 shadow-sm'
               }
             `}>
@@ -124,7 +123,7 @@ export const Guide: React.FC = () => {
                 <span className={`text-sm font-bold uppercase tracking-wider ${step.highlight ? 'text-blue-100' : 'text-slate-400'}`}>
                   Étape {i + 1}
                 </span>
-                {i < 5 && !step.highlight && <ArrowRight size={16} className="text-slate-300" />}
+                {i < 4 && !step.highlight && <ArrowRight size={16} className="text-slate-300" />}
               </div>
               <h4 className={`text-lg font-bold mb-2 ${step.highlight ? 'text-white' : 'text-slate-800'}`}>{step.title}</h4>
               <p className={`font-medium leading-relaxed ${step.highlight ? 'text-blue-50' : 'text-slate-500'}`}>{step.desc}</p>

@@ -138,6 +138,7 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
                 <div className="bg-blue-100 p-2 rounded-xl text-blue-600"><Info size={24} /></div>
                 📝 Consignes d'utilisation
               </h3>
+              <p className="text-sm font-bold text-slate-600 mb-6">Pour une reconnaissance optimale, suivez ces recommandations :</p>
               <ul className="space-y-4 text-slate-600 font-bold">
                 <li className="flex items-start gap-3">
                   <span className="bg-blue-50 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">1</span>
@@ -156,42 +157,30 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
                   <span>Marquez une courte pause entre chaque valeur dictée ⏸️</span>
                 </li>
               </ul>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200">
-                <h4 className="font-black text-slate-800 flex items-center gap-2 mb-3 text-sm">
-                  <Beaker size={18} className="text-indigo-500" />
-                  Section 1 : Clinique
-                </h4>
-                <p className="text-xs text-slate-500 font-bold mb-3 italic">"Âge 45 ans, sexe masculin, BMI 28, tabac oui"</p>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 flex items-start gap-2">
-                  <Lightbulb size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                  <p className="text-[10px] text-slate-400 font-bold uppercase leading-relaxed">Astuce: Dites "Pas de tabac" ou "tabac non"</p>
-                </div>
-              </div>
+              <div className="mt-10 pt-8 border-t border-slate-100">
+                <h3 className="text-xl font-black text-slate-800 flex items-center gap-3 mb-6">
+                  <div className="bg-emerald-100 p-2 rounded-xl text-emerald-600"><Lightbulb size={24} /></div>
+                  💬 Exemples de dictée par section
+                </h3>
+                <div className="grid grid-cols-1 gap-6">
+                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <h4 className="font-black text-slate-800 flex items-center gap-2 mb-3 text-sm">📋 Section 1 - Données cliniques :</h4>
+                    <p className="text-sm text-slate-600 font-bold italic mb-3">"Âge 45 ans, sexe masculin, BMI 28, tabac oui"</p>
+                    <p className="text-[11px] text-slate-400 font-bold uppercase">💡 Astuce : vous pouvez dire : Pas de tabac, patient non tabagique, tabac non</p>
+                  </div>
 
-              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200">
-                <h4 className="font-black text-slate-800 flex items-center gap-2 mb-3 text-sm">
-                  <Beaker size={18} className="text-indigo-500" />
-                  Section 2 : Antécédents
-                </h4>
-                <p className="text-xs text-slate-500 font-bold mb-3 italic">"HTA oui, DT2 non, DYSLIPIDEMIE oui, AVC non"</p>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 flex items-start gap-2">
-                  <Lightbulb size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                  <p className="text-[10px] text-slate-400 font-bold uppercase leading-relaxed">Astuce: Dites "patient non hypertendu" etc</p>
-                </div>
-              </div>
+                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <h4 className="font-black text-slate-800 flex items-center gap-2 mb-3 text-sm">🏥 Section 2 - Antécédents :</h4>
+                    <p className="text-sm text-slate-600 font-bold italic mb-3">"HTA oui, DT2 non, DYSLIPIDEMIE oui, AVC non"</p>
+                    <p className="text-[11px] text-slate-400 font-bold uppercase">💡 Astuce : vous pouvez dire : pas d'HTA ou patient non hypertendu ou HTA oui , etc</p>
+                  </div>
 
-              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200">
-                <h4 className="font-black text-slate-800 flex items-center gap-2 mb-3 text-sm">
-                  <Beaker size={18} className="text-indigo-500" />
-                  Section 3 : Biologie
-                </h4>
-                <p className="text-xs text-slate-500 font-bold mb-3 italic">"Hémoglobine 13.5, globules blancs 7000, plaquettes 250000"</p>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 flex items-start gap-2">
-                  <Lightbulb size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                  <p className="text-[10px] text-slate-400 font-bold uppercase leading-relaxed">Astuce: Dictez les valeurs sans les unités</p>
+                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <h4 className="font-black text-slate-800 flex items-center gap-2 mb-3 text-sm">🧪 Section 3 - Biologie :</h4>
+                    <p className="text-sm text-slate-600 font-bold italic mb-3">"Hémoglobine 13.5, globules blancs 7000, plaquettes 250000"</p>
+                    <p className="text-[11px] text-slate-400 font-bold uppercase">💡 Astuce : Dictez les valeurs sans les unités.</p>
+                  </div>
                 </div>
               </div>
             </div>
