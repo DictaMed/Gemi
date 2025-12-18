@@ -71,8 +71,9 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
 
     try {
       const formData = new FormData();
-      // Extraction du nom pour affichage (ex: jean.dupont -> jean dupont)
-      const userName = user.login.split('@')[0].replace('.', ' '); 
+      // Extraction du nom pour affichage (ex: jean.marc.dupont -> jean marc dupont)
+      // Utilisation d'une regex globale (/\./g) pour remplacer TOUS les points
+      const userName = user.login.split('@')[0].replace(/\./g, ' '); 
       
       // Envoi des métadonnées
       formData.append('nom_prenom_user', userName);

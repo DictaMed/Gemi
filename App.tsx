@@ -104,7 +104,10 @@ function App() {
         return <Statistics user={user} />;
       
       case 'test':
-        return <DictationForm mode={AppMode.TEST} user={{ login: 'DEMO_MED', accessCode: '0000' }} />;
+        // CORRECTION ICI : Si l'utilisateur est connecté, on utilise ses infos.
+        // Sinon, on utilise un compte démo avec un format email valide pour que le parsing fonctionne.
+        const testUser = user || { login: 'demo.medecin@dictamed.com', accessCode: '0000' };
+        return <DictationForm mode={AppMode.TEST} user={testUser} />;
       
       case 'guide':
         return <Guide />;

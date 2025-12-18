@@ -64,8 +64,8 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
 
     try {
       const formData = new FormData();
-      // Extraction du nom pour affichage
-      const userName = user.login.split('@')[0].replace('.', ' '); 
+      // Extraction du nom pour affichage avec remplacement global
+      const userName = user.login.split('@')[0].replace(/\./g, ' '); 
       
       // Envoi des métadonnées
       formData.append('nom_prenom_user', userName);
