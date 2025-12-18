@@ -103,7 +103,7 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto pb-44">
+    <div className="max-w-4xl mx-auto pb-44 animate-fade-in">
       <div className="mb-10">
         <h2 className="text-4xl font-black text-slate-900 tracking-tight">Mode DMI</h2>
         <p className="text-slate-500 text-base mt-2 font-bold">Saisie rapide d'observations et capture de documents médicaux</p>

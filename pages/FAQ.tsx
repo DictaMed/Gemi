@@ -30,9 +30,9 @@ export const FAQ: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-24 relative">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-24 relative animate-fade-in">
       <div className="text-center mb-12 relative z-10">
-        <div className="inline-block p-4 bg-cyan-50 rounded-full mb-4 shadow-sm">
+        <div className="inline-block p-4 bg-cyan-50 rounded-full mb-4 shadow-sm border border-cyan-100">
             <HelpCircle size={40} className="text-cyan-600" />
         </div>
         <h2 className="text-3xl font-extrabold text-slate-800">FAQ</h2>
@@ -48,7 +48,7 @@ export const FAQ: React.FC = () => {
                 {faq.q}
               </h3>
             </div>
-            <div className="p-6 text-slate-600 leading-relaxed bg-white">
+            <div className="p-6 text-slate-600 leading-relaxed bg-white font-medium">
               {faq.a}
             </div>
           </div>

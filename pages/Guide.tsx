@@ -3,7 +3,7 @@ import { BookOpen, AlertTriangle, Lightbulb, Mic, ListOrdered, ArrowRight, Check
 
 export const Guide: React.FC = () => {
   return (
-    <div className="max-w-5xl mx-auto p-4 sm:p-6 pb-24 relative">
+    <div className="max-w-5xl mx-auto p-4 sm:p-6 pb-24 relative animate-fade-in">
       <div className="text-center mb-12 relative z-10">
         <div className="inline-block p-4 bg-blue-50 rounded-full mb-4 shadow-sm">
             <BookOpen size={40} className="text-blue-600" />
@@ -95,7 +95,7 @@ export const Guide: React.FC = () => {
         </div>
       </div>
 
-      {/* Processus - Étape 3 supprimée */}
+      {/* Processus - Mis à jour en 5 étapes */}
       <div className="relative z-10">
         <div className="flex items-center gap-3 mb-8">
           <div className="bg-blue-50 p-3 rounded-2xl">
@@ -116,7 +116,7 @@ export const Guide: React.FC = () => {
               rounded-2xl p-6 border flex flex-col h-full
               ${step.highlight 
                 ? 'bg-gradient-to-br from-blue-600 to-teal-500 text-white border-transparent shadow-lg shadow-blue-200' 
-                : 'bg-white border-slate-200 text-slate-600 shadow-sm'
+                : 'bg-white border-slate-200 text-slate-600 shadow-sm hover:border-slate-300'
               }
             `}>
               <div className="flex justify-between items-start mb-4">

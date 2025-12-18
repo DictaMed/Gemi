@@ -50,14 +50,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange, user, o
                     key={item.id}
                     onClick={() => onTabChange(item.id)}
                     className={`
-                      flex items-center px-5 py-3 rounded-xl text-sm sm:text-base font-bold transition-all duration-200 whitespace-nowrap
+                      flex items-center px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap
                       ${isActive 
                         ? 'bg-white text-emerald-700 shadow-sm ring-1 ring-black/5' 
                         : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
                       }
                     `}
                   >
-                    <Icon size={20} className={`sm:mr-2.5 ${isActive ? 'text-emerald-500' : 'text-slate-400'}`} strokeWidth={2.5} />
+                    <Icon size={18} className={`sm:mr-2 ${isActive ? 'text-emerald-500' : 'text-slate-400'}`} strokeWidth={2.5} />
                     <span className="hidden sm:inline">{item.label}</span>
                   </button>
                 );
@@ -72,10 +72,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange, user, o
                 </div>
                 <button 
                   onClick={onLogout}
-                  className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 transition-all hover:shadow-sm"
+                  className="p-2.5 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 transition-all hover:shadow-sm"
                   title="Déconnexion"
                 >
-                  <LogOut size={22} strokeWidth={2.5} />
+                  <LogOut size={20} strokeWidth={2.5} />
                 </button>
               </div>
             )}

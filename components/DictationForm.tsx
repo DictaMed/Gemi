@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusCircle, MinusCircle, Send, CheckCircle2, AlertTriangle, ExternalLink, Info, Lightbulb, Beaker } from 'lucide-react';
+import { PlusCircle, MinusCircle, Send, CheckCircle2, AlertTriangle, ExternalLink, Info, Lightbulb } from 'lucide-react';
 import { AudioRecorder } from './AudioRecorder';
 import { PatientForm } from './PatientForm';
 import { PatientInfo, AudioData, AppMode, UserCredentials } from '../types';
@@ -129,16 +129,17 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
 
   return (
     <div className="max-w-4xl mx-auto pb-44">
-      {mode === AppMode.TEST ? (
-        <div className="mb-10 text-center sm:text-left">
+      {mode === AppMode.TEST && (
+        <div className="mb-10 text-center sm:text-left animate-fade-in">
           <h2 className="text-4xl font-black text-slate-900 tracking-tight">Démonstration DictaMed</h2>
+          
           <div className="mt-8 space-y-6">
             <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
               <h3 className="text-xl font-black text-slate-800 flex items-center gap-3 mb-6">
                 <div className="bg-blue-100 p-2 rounded-xl text-blue-600"><Info size={24} /></div>
                 📝 Consignes d'utilisation
               </h3>
-              <p className="text-sm font-bold text-slate-600 mb-6">Pour une reconnaissance optimale, suivez ces recommandations :</p>
+              <p className="text-sm font-bold text-slate-600 mb-6 uppercase tracking-wider">Pour une reconnaissance optimale, suivez ces recommandations :</p>
               <ul className="space-y-4 text-slate-600 font-bold">
                 <li className="flex items-start gap-3">
                   <span className="bg-blue-50 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">1</span>
@@ -166,20 +167,26 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
                 <div className="grid grid-cols-1 gap-6">
                   <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
                     <h4 className="font-black text-slate-800 flex items-center gap-2 mb-3 text-sm">📋 Section 1 - Données cliniques :</h4>
-                    <p className="text-sm text-slate-600 font-bold italic mb-3">"Âge 45 ans, sexe masculin, BMI 28, tabac oui"</p>
-                    <p className="text-[11px] text-slate-400 font-bold uppercase">💡 Astuce : vous pouvez dire : Pas de tabac, patient non tabagique, tabac non</p>
+                    <p className="text-base text-slate-600 font-bold italic mb-3">"Âge 45 ans, sexe masculin, BMI 28, tabac oui"</p>
+                    <p className="text-[11px] text-slate-400 font-black uppercase tracking-widest leading-relaxed">
+                      💡 Astuce : vous pouvez dire : Pas de tabac, patient non tabagique, tabac non
+                    </p>
                   </div>
 
                   <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
                     <h4 className="font-black text-slate-800 flex items-center gap-2 mb-3 text-sm">🏥 Section 2 - Antécédents :</h4>
-                    <p className="text-sm text-slate-600 font-bold italic mb-3">"HTA oui, DT2 non, DYSLIPIDEMIE oui, AVC non"</p>
-                    <p className="text-[11px] text-slate-400 font-bold uppercase">💡 Astuce : vous pouvez dire : pas d'HTA ou patient non hypertendu ou HTA oui , etc</p>
+                    <p className="text-base text-slate-600 font-bold italic mb-3">"HTA oui, DT2 non, DYSLIPIDEMIE oui, AVC non"</p>
+                    <p className="text-[11px] text-slate-400 font-black uppercase tracking-widest leading-relaxed">
+                      💡 Astuce : vous pouvez dire : pas d'HTA ou patient non hypertendu ou HTA oui , etc
+                    </p>
                   </div>
 
                   <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
                     <h4 className="font-black text-slate-800 flex items-center gap-2 mb-3 text-sm">🧪 Section 3 - Biologie :</h4>
-                    <p className="text-sm text-slate-600 font-bold italic mb-3">"Hémoglobine 13.5, globules blancs 7000, plaquettes 250000"</p>
-                    <p className="text-[11px] text-slate-400 font-bold uppercase">💡 Astuce : Dictez les valeurs sans les unités.</p>
+                    <p className="text-base text-slate-600 font-bold italic mb-3">"Hémoglobine 13.5, globules blancs 7000, plaquettes 250000"</p>
+                    <p className="text-[11px] text-slate-400 font-black uppercase tracking-widest leading-relaxed">
+                      💡 Astuce : Dictez les valeurs sans les unités.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -201,7 +208,7 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
             </div>
           </div>
         </div>
-      ) : null}
+      )}
 
       <PatientForm 
         info={patientInfo} 
