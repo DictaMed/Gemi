@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { User, FileText, Contact } from 'lucide-react';
 import { PatientInfo } from '../types';
 
@@ -30,7 +30,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ info, onChange, disabl
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-600 ml-1 uppercase tracking-wide">
-            IPP / Numéro Patient {!isTestMode && <span className="text-rose-500">*</span>}
+            Numéro de Dossier {!isTestMode && <span className="text-rose-500">*</span>}
           </label>
           <div className="relative group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

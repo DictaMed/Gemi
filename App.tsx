@@ -16,14 +16,13 @@ function App() {
   const [user, setUser] = useState<UserCredentials | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
 
-  // Observer l'état de l'authentification Firebase
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         setUser({
           login: firebaseUser.email || 'Utilisateur Google',
           accessCode: 'GOOGLE_SECURED',
-          uid: firebaseUser.uid // Stockage de l'UID pour Firestore
+          uid: firebaseUser.uid 
         });
       } else {
         setUser(prev => (prev?.accessCode === 'GOOGLE_SECURED' ? null : prev));
@@ -34,7 +33,6 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  // Gestion du login manuel (fallback)
   const handleManualLogin = (creds: UserCredentials) => {
     setUser(creds);
   };
@@ -43,7 +41,7 @@ function App() {
     try {
       await signOut(auth);
     } catch (error) {
-      console.error("Erreur de déconnexion", error);
+      console.error("Erreur déconnexion", error);
     }
     setUser(null);
     setCurrentTab('normal');
@@ -51,44 +49,31 @@ function App() {
 
   const renderContent = () => {
     if (loadingAuth && currentTab === 'normal') {
-      return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div></div>;
+      return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-16 w-16 border-4 border-slate-100 border-t-emerald-500"></div></div>;
     }
 
     switch (currentTab) {
       case 'normal':
-        if (!user) {
-          return <AuthForm onLogin={handleManualLogin} />;
-        }
+        if (!user) return <AuthForm onLogin={handleManualLogin} />;
         return <DictationForm mode={AppMode.NORMAL} user={user} />;
       
       case 'dmi':
-        if (!user) {
-           return (
-             <div>
-                <div className="text-center mb-6 text-cyan-600 font-medium bg-cyan-50 p-3 rounded-lg inline-block mx-auto">
-                   Veuillez vous connecter pour accéder au Mode DMI
-                </div>
-                <AuthForm onLogin={handleManualLogin} />
-             </div>
-           );
-        }
+        if (!user) return (
+           <div className="animate-fade-in">
+              <div className="max-w-md mx-auto mb-8 bg-blue-50 border border-blue-100 p-6 rounded-3xl text-center">
+                 <p className="text-blue-800 font-black">Veuillez vous identifier pour accéder au module DMI</p>
+              </div>
+              <AuthForm onLogin={handleManualLogin} />
+           </div>
+        );
         return <DMIForm user={user} />;
 
       case 'stats':
-        if (!user) {
-          return (
-            <div>
-               <div className="text-center mb-6 text-indigo-600 font-medium bg-indigo-50 p-3 rounded-lg inline-block mx-auto">
-                  Veuillez vous connecter pour voir vos statistiques
-               </div>
-               <AuthForm onLogin={handleManualLogin} />
-            </div>
-          );
-       }
-       return <Statistics user={user} />;
+        if (!user) return <AuthForm onLogin={handleManualLogin} />;
+        return <Statistics user={user} />;
       
       case 'test':
-        return <DictationForm mode={AppMode.TEST} user={{ login: 'TEST_USER', accessCode: '0000' }} />;
+        return <DictationForm mode={AppMode.TEST} user={{ login: 'DEMO_MED', accessCode: '0000' }} />;
       
       case 'guide':
         return <Guide />;
@@ -100,7 +85,7 @@ function App() {
         return <Contact />;
       
       default:
-        return <div className="p-8 text-center">Page introuvable</div>;
+        return <div className="p-8 text-center font-black">Section en développement</div>;
     }
   };
 
@@ -112,11 +97,13 @@ function App() {
         user={user}
         onLogout={handleLogout}
       />
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className="flex-grow container mx-auto px-4 py-12">
         {renderContent()}
       </main>
-      <footer className="bg-white border-t border-slate-200 py-6 text-center text-slate-400 text-sm">
-        &copy; {new Date().getFullYear()} DictaMed. Application Frontend sécurisée avec Firebase.
+      <footer className="bg-white border-t border-slate-100 py-10 text-center">
+        <span className="text-slate-400 font-black tracking-widest uppercase text-xs">
+          &copy; {new Date().getFullYear()} DictaMed
+        </span>
       </footer>
     </div>
   );

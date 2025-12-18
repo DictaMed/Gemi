@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { UserCredentials, UserStats } from '../types';
-import { validateStatsSchema, getDefaultStats } from '../utils/statsValidator';
-import {
-  BarChart3,
-  Mic,
-  FolderPlus,
-  Clock,
-  TrendingUp,
+import { 
+  BarChart3, 
+  Mic, 
+  FolderPlus, 
+  Clock, 
+  TrendingUp, 
   Calendar,
   ArrowUpRight,
   Zap,
@@ -25,29 +24,24 @@ export const Statistics: React.FC<StatisticsProps> = ({ user }) => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!user.uid) {
-        setLoading(false);
-        return;
-      }
-
+      if (!user.uid) return;
       try {
         const docRef = doc(db, 'users', user.uid);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          // Valider et normaliser les données récupérées
-          const rawStats = docSnap.data();
-          const validatedStats = validateStatsSchema(rawStats);
-          setStats(validatedStats);
+          setStats(docSnap.data() as UserStats);
         } else {
-          // Document n'existe pas encore - utiliser les valeurs par défaut
-          console.log('Aucune statistique trouvée pour cet utilisateur, utilisation des valeurs par défaut');
-          setStats(getDefaultStats());
+          setStats({
+            totalDictations: 0,
+            totalDMI: 0,
+            totalDictationTime: 0,
+            totalWords: 0,
+            lastActivity: new Date().toISOString()
+          });
         }
       } catch (error) {
         console.error("Erreur lors de la récupération des statistiques:", error);
-        // En cas d'erreur, afficher les valeurs par défaut
-        setStats(getDefaultStats());
       } finally {
         setLoading(false);
       }

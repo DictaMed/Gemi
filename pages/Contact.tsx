@@ -3,100 +3,97 @@ import { Mail, Facebook, MapPin, ClipboardList, Clock, Coins, Phone, Building2, 
 
 export const Contact: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-24">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-extrabold text-slate-800 mb-2">Contactez-nous</h2>
-        <p className="text-slate-500 font-medium">Pour commander ou tester la solution</p>
+    <div className="max-w-5xl mx-auto p-4 sm:p-6 pb-32">
+      <div className="text-center mb-16">
+        <h2 className="text-4xl font-black text-slate-900 tracking-tight">Contactez DictaMed</h2>
+        <p className="text-slate-500 font-bold mt-2 text-lg">Solution de dictée intelligente pour la recherche clinique</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-16">
         {/* Carte Commander */}
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col h-full relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-5">
-            <Coins size={100} />
+        <div className="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col h-full relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform">
+            <Coins size={120} />
           </div>
           
-          <h3 className="font-bold text-2xl text-slate-800 mb-6 flex items-center gap-3">
-            <div className="bg-emerald-100 p-2.5 rounded-xl">
-               <Mail className="text-emerald-600" size={24} />
+          <h3 className="font-black text-2xl text-slate-800 mb-8 flex items-center gap-4">
+            <div className="bg-emerald-100 p-3 rounded-2xl">
+               <Mail className="text-emerald-600" size={28} />
             </div>
-            Commander DictaMed
+            Commander la solution
           </h3>
 
-          <div className="space-y-6 flex-grow">
-            <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-               <Mail className="text-blue-500 mt-1 flex-shrink-0" size={20} />
+          <div className="space-y-8 flex-grow">
+            <div className="flex items-start gap-5 p-6 bg-slate-50 rounded-3xl border border-slate-100">
+               <Mail className="text-blue-500 mt-1 flex-shrink-0" size={24} />
                <div>
-                 <span className="block text-sm text-slate-400 font-bold uppercase tracking-wider mb-1">Email</span>
-                 <a href="mailto:DictaMed.SPSS@gmail.com" className="text-slate-800 font-bold text-lg hover:text-blue-600 transition-colors break-all">
+                 <span className="block text-xs text-slate-400 font-black uppercase tracking-widest mb-1">Email direct</span>
+                 <a href="mailto:DictaMed.SPSS@gmail.com" className="text-slate-800 font-black text-xl hover:text-blue-600 transition-colors break-all">
                    DictaMed.SPSS@gmail.com
                  </a>
                </div>
             </div>
 
-            <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-               <Facebook className="text-blue-600 mt-1 flex-shrink-0" size={20} />
+            <div className="flex items-start gap-5 p-6 bg-slate-50 rounded-3xl border border-slate-100">
+               <Facebook className="text-blue-600 mt-1 flex-shrink-0" size={24} />
                <div>
-                 <span className="block text-sm text-slate-400 font-bold uppercase tracking-wider mb-1">Facebook</span>
-                 <a href="https://www.facebook.com/DictaMed.SPSS" target="_blank" rel="noopener noreferrer" className="text-slate-800 font-bold text-lg hover:text-blue-600 transition-colors">
+                 <span className="block text-xs text-slate-400 font-black uppercase tracking-widest mb-1">Facebook</span>
+                 <a href="https://www.facebook.com/DictaMed.SPSS" target="_blank" rel="noopener noreferrer" className="text-slate-800 font-black text-xl hover:text-blue-600 transition-colors">
                    DictaMed.SPSS
                  </a>
                </div>
             </div>
 
-            <div className="flex items-start gap-3 text-slate-600 font-medium bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100">
-              <Coins className="text-emerald-500 mt-1 flex-shrink-0" size={20} />
-              <p>Tarification personnalisée selon le nombre de patients et de variables à collecter.</p>
+            <div className="flex items-start gap-4 text-slate-600 font-bold bg-emerald-50/50 p-6 rounded-3xl border border-emerald-100">
+              <Coins className="text-emerald-500 mt-1 flex-shrink-0" size={24} />
+              <p className="text-base leading-relaxed">Tarification sur-mesure adaptée à la taille de votre étude et au nombre de variables.</p>
             </div>
           </div>
         </div>
 
-        {/* Carte Infos à fournir */}
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col h-full relative overflow-hidden">
-           <div className="absolute top-0 right-0 p-4 opacity-5">
-            <ClipboardList size={100} />
+        {/* Carte Infos */}
+        <div className="bg-slate-900 p-10 rounded-[3rem] shadow-2xl flex flex-col h-full relative overflow-hidden group">
+           <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
+            <ClipboardList size={120} className="text-white" />
           </div>
 
-          <h3 className="font-bold text-2xl text-slate-800 mb-6 flex items-center gap-3">
-            <div className="bg-blue-100 p-2.5 rounded-xl">
-               <ClipboardList className="text-blue-600" size={24} />
+          <h3 className="font-black text-2xl text-white mb-8 flex items-center gap-4">
+            <div className="bg-blue-600 p-3 rounded-2xl">
+               <ClipboardList className="text-white" size={28} />
             </div>
-            Informations à fournir
+            Dossier de candidature
           </h3>
           
-          <p className="text-slate-500 mb-6 font-medium">Pour établir un devis personnalisé, veuillez nous communiquer :</p>
+          <p className="text-blue-100/70 mb-8 font-bold text-base leading-relaxed">Pour un déploiement rapide, communiquez-nous :</p>
 
-          <ul className="space-y-4">
+          <ul className="space-y-5">
             {[
-              { icon: Users, text: "Nom et prénom" },
-              { icon: Phone, text: "Numéro de téléphone" },
-              { icon: Building2, text: "Établissement" },
-              { icon: Users, text: "Nombre de patients à inclure" },
-              { icon: FileSpreadsheet, text: "Fichier SPSS avec vos variables définies" },
-              { icon: Calendar, text: "Date de démarrage souhaitée" },
+              { icon: Users, text: "Identité complète du praticien" },
+              { icon: Phone, text: "Coordonnées de contact direct" },
+              { icon: Building2, text: "Établissement ou Laboratoire" },
+              { icon: FileSpreadsheet, text: "Structure du fichier SPSS (Variables)" },
+              { icon: Calendar, text: "Calendrier prévisionnel de l'étude" },
             ].map((item, idx) => (
-              <li key={idx} className="flex items-center gap-3 text-slate-700 font-medium">
-                <div className="bg-slate-100 p-1.5 rounded-lg text-slate-500">
-                  <item.icon size={16} />
+              <li key={idx} className="flex items-center gap-4 text-white font-bold text-base">
+                <div className="bg-white/10 p-2 rounded-xl text-blue-400">
+                  <item.icon size={20} />
                 </div>
                 {item.text}
               </li>
             ))}
           </ul>
 
-          <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-center gap-2 text-emerald-600 font-bold bg-emerald-50 py-3 rounded-xl">
-            <Clock size={20} />
-            Délai de réponse : 48 heures ouvrées
+          <div className="mt-10 pt-8 border-t border-white/10 flex items-center justify-center gap-3 text-emerald-400 font-black bg-white/5 py-4 rounded-2xl">
+            <Clock size={22} />
+            Étude de faisabilité sous 48h
           </div>
         </div>
-
       </div>
       
       <div className="flex justify-center">
-        <div className="flex items-center text-slate-400 text-sm bg-white px-6 py-3 rounded-full shadow-sm border border-slate-100">
-          <MapPin size={16} className="mr-2" />
-          <p>DictaMed SAS - Paris, France</p>
+        <div className="flex items-center text-slate-500 font-black text-base bg-white px-10 py-5 rounded-3xl shadow-md border border-slate-100 group transition-all hover:bg-slate-50">
+          <MapPin size={24} className="mr-3 text-blue-600 group-hover:animate-bounce" />
+          <p>DictaMed - Monastir - Tunisie</p>
         </div>
       </div>
     </div>
