@@ -61,24 +61,52 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
     setSubmitError(null);
 
     const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+    
+    // Préparation des données utilisateur communes
+    const userName = user.login.split('@')[0].replace(/\./g, ' '); 
+    const userEmail = user.login;
+
+    const submissionPromises: Promise<Response>[] = [];
 
     try {
-      const formData = new FormData();
-      // Extraction du nom pour affichage avec remplacement global
-      const userName = user.login.split('@')[0].replace(/\./g, ' '); 
-      
-      // Envoi des métadonnées
-      formData.append('nom_prenom_user', userName);
-      
-      // CRITIQUE : Envoi de l'email exact de l'utilisateur connecté
-      formData.append('email', user.login);
+      // 1. Envoi du TEXTE s'il y en a
+      if (text.trim()) {
+        const formDataText = new FormData();
+        formDataText.append('nom_prenom_user', userName);
+        formDataText.append('email', userEmail);
+        formDataText.append('Texte_DMI', text);
+        
+        console.log("Envoi Texte vers:", WEBHOOK_URLS.DMI_TEXT);
+        submissionPromises.push(
+          fetch(WEBHOOK_URLS.DMI_TEXT, { method: 'POST', body: formDataText })
+        );
+      }
 
-      if (text.trim()) formData.append('Texte_DMI', text);
-      images.forEach((file, index) => formData.append('Photo_DMI', file, `photo_${index + 1}_${file.name}`));
+      // 2. Envoi des PHOTOS s'il y en a
+      if (images.length > 0) {
+        const formDataPhotos = new FormData();
+        formDataPhotos.append('nom_prenom_user', userName);
+        formDataPhotos.append('email', userEmail);
+        
+        images.forEach((file, index) => {
+          formDataPhotos.append('Photo_DMI', file, `photo_${index + 1}_${file.name}`);
+        });
 
-      // Utilisation de la clé centralisée
-      const response = await fetch(WEBHOOK_URLS.DMI_SUBMISSION, { method: 'POST', body: formData });
-      if (!response.ok) throw new Error('Erreur envoi');
+        console.log("Envoi Photos vers:", WEBHOOK_URLS.DMI_PHOTOS);
+        submissionPromises.push(
+          fetch(WEBHOOK_URLS.DMI_PHOTOS, { method: 'POST', body: formDataPhotos })
+        );
+      }
+
+      // Exécution parallèle des envois
+      const responses = await Promise.all(submissionPromises);
+
+      // Vérification des résultats (tolérance 500 pour n8n)
+      for (const response of responses) {
+        if (!response.ok && response.status !== 500) {
+          throw new Error(`Erreur serveur (${response.status}) sur l'un des envois`);
+        }
+      }
 
       await updateStats(wordCount);
       setSubmitSuccess(true);
@@ -90,6 +118,7 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
       }, 3000);
 
     } catch (error) {
+      console.error(error);
       setSubmitError("Échec de l'envoi.");
     } finally {
       setIsSubmitting(false);
@@ -103,7 +132,7 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
           <CheckCircle size={48} className="text-emerald-500 animate-bounce" />
         </div>
         <h2 className="text-3xl font-black text-slate-800 mb-3 tracking-tight">Données envoyées !</h2>
-        <p className="text-slate-500 text-lg max-w-md font-bold">Votre observation DMI a été transmise avec succès.</p>
+        <p className="text-slate-500 text-lg max-w-md font-bold">Vos données (texte et/ou photos) ont été transmises séparément avec succès.</p>
       </div>
     );
   }
@@ -126,6 +155,9 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
           className="w-full h-80 p-6 bg-slate-50 border border-slate-200 rounded-3xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all resize-none text-slate-700 leading-relaxed font-bold text-lg placeholder:text-slate-300 outline-none"
           placeholder="Dictez ou saisissez vos observations ici..."
         />
+        <div className="mt-2 text-right text-xs text-slate-400 font-bold">
+           Envoi vers : Webhook Texte
+        </div>
       </div>
 
       <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8 sm:p-10 mb-10">
@@ -164,6 +196,9 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
             ))}
           </div>
         )}
+        <div className="mt-4 text-right text-xs text-slate-400 font-bold">
+           Envoi vers : Webhook Photos
+        </div>
       </div>
 
       <div className="fixed bottom-8 left-4 right-4 z-40 flex justify-center pointer-events-none">

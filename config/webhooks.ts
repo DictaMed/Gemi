@@ -18,6 +18,9 @@ export const WEBHOOK_URLS = {
   // SECTION DMI (Dossier Médical Informatisé)
   // ---------------------------------------------------------
 
-  // Webhook unique pour l'envoi du formulaire DMI (gère Texte + Photos en multipart)
-  DMI_SUBMISSION: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed_DMI',
+  // Webhook pour l'envoi de texte uniquement (Observations)
+  DMI_TEXT: 'https://n8n.srv1104707.hstgr.cloud/webhook/Text',
+
+  // Webhook pour l'envoi de photos uniquement
+  DMI_PHOTOS: 'https://n8n.srv1104707.hstgr.cloud/webhook/Photos',
 };
