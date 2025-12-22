@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Lock, User, ShieldCheck, LogIn, Stethoscope } from 'lucide-react';
+import { Lock, User, ShieldCheck, LogIn, Stethoscope, UserPlus, Mail, ArrowRight } from 'lucide-react';
 import { UserCredentials } from '../types';
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 
 interface AuthFormProps {
@@ -9,18 +9,67 @@ interface AuthFormProps {
 }
 
 export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
+  const [isRegistering, setIsRegistering] = useState(false);
   const [login, setLogin] = useState('');
   const [accessCode, setAccessCode] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!login.trim() || !accessCode.trim()) {
       setError('Veuillez remplir tous les champs.');
       return;
     }
-    onLogin({ login, accessCode });
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      if (isRegistering) {
+        // --- MODE CRÉATION DE COMPTE (Firebase Auth) ---
+        try {
+          await createUserWithEmailAndPassword(auth, login, accessCode);
+          // Le hook onAuthStateChanged dans App.tsx détectera la connexion et créera le profil BDD
+        } catch (firebaseError: any) {
+          console.error("Erreur inscription:", firebaseError.code);
+          switch (firebaseError.code) {
+            case 'auth/email-already-in-use':
+              throw new Error("Cet email est déjà utilisé.");
+            case 'auth/invalid-email':
+              throw new Error("Format d'email invalide.");
+            case 'auth/weak-password':
+              throw new Error("Le mot de passe doit contenir au moins 6 caractères.");
+            default:
+              throw new Error("Erreur lors de la création du compte.");
+          }
+        }
+      } else {
+        // --- MODE CONNEXION ---
+        
+        // 1. Essayer d'abord la connexion Firebase (Email/Password)
+        try {
+           // On vérifie basiquement si c'est un email pour éviter un appel API inutile
+           if (login.includes('@')) {
+             await signInWithEmailAndPassword(auth, login, accessCode);
+             // Succès : App.tsx prendra le relais
+           } else {
+             // Ce n'est pas un email, on passe directement au mode manuel
+             throw new Error("ManualAuthRequired"); 
+           }
+        } catch (err: any) {
+           // Si l'auth Firebase échoue (ou si c'est un ID Dr classique), on utilise la méthode manuelle legacy
+           if (err.message === "ManualAuthRequired" || err.code === "auth/invalid-email" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+              onLogin({ login, accessCode });
+           } else {
+             throw err; // Vraie erreur technique
+           }
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || "Une erreur est survenue.");
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
@@ -29,6 +78,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
+      // Pour Google, on passe aussi par onLogin pour la cohérence, 
+      // mais App.tsx le gérera via le listener Firebase de toute façon.
       onLogin({ 
         login: user.email || user.uid, 
         accessCode: 'GOOGLE_AUTH_TOKEN' 
@@ -41,46 +92,67 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
     }
   };
 
+  const toggleMode = () => {
+    setIsRegistering(!isRegistering);
+    setError('');
+    setLogin('');
+    setAccessCode('');
+  };
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
-      <div className="bg-white/95 backdrop-blur-xl p-8 sm:p-12 rounded-[2.5rem] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.12)] w-full max-w-md border border-slate-100 ring-1 ring-slate-200/60 relative overflow-hidden">
+      <div className="bg-white/95 backdrop-blur-xl p-8 sm:p-12 rounded-[2.5rem] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.12)] w-full max-w-md border border-slate-100 ring-1 ring-slate-200/60 relative overflow-hidden transition-all duration-500">
         
-        <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-400/5 rounded-full blur-3xl -mr-24 -mt-24 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/5 rounded-full blur-3xl -ml-24 -mb-24 pointer-events-none"></div>
+        <div className={`absolute top-0 right-0 w-48 h-48 bg-emerald-400/5 rounded-full blur-3xl -mr-24 -mt-24 pointer-events-none transition-colors duration-500 ${isRegistering ? 'bg-blue-400/10' : ''}`}></div>
+        <div className={`absolute bottom-0 left-0 w-48 h-48 bg-blue-400/5 rounded-full blur-3xl -ml-24 -mb-24 pointer-events-none transition-colors duration-500 ${isRegistering ? 'bg-emerald-400/10' : ''}`}></div>
 
         <div className="text-center mb-10 relative z-10">
           <div className="bg-white w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-slate-100 border border-slate-50">
-            <Stethoscope className="text-emerald-500" size={40} strokeWidth={2} />
+            <Stethoscope className={isRegistering ? "text-blue-500" : "text-emerald-500"} size={40} strokeWidth={2} />
           </div>
           <h2 className="text-3xl font-black tracking-tight mb-3">
-            <span className="text-black">Se connecter à </span>
-            <span className="text-blue-600">Dicta</span><span className="text-emerald-600">Med</span>
+            {isRegistering ? (
+              <>
+                <span className="text-black">Créer un </span>
+                <span className="text-blue-600">Compte</span>
+              </>
+            ) : (
+              <>
+                <span className="text-black">Se connecter à </span>
+                <span className="text-blue-600">Dicta</span><span className="text-emerald-600">Med</span>
+              </>
+            )}
           </h2>
           <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider">
-             <ShieldCheck size={14} className="text-emerald-500" />
+             <ShieldCheck size={14} className={isRegistering ? "text-blue-500" : "text-emerald-500"} />
              <span>Espace Sécurisé</span>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label className="block text-xs font-black text-slate-500 uppercase ml-1 tracking-widest">Votre identifiant Dr</label>
+            <label className="block text-xs font-black text-slate-500 uppercase ml-1 tracking-widest">
+              {isRegistering ? "Email Professionnel" : "Identifiant Dr ou Email"}
+            </label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
-                <User size={20} />
+                {isRegistering ? <Mail size={20} /> : <User size={20} />}
               </div>
               <input
-                type="text"
+                type={isRegistering ? "email" : "text"}
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
                 className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-slate-800 font-bold placeholder:text-slate-400/70 transition-all outline-none"
-                placeholder="Dr Flen"
+                placeholder={isRegistering ? "docteur@exemple.com" : "Dr Flen ou email"}
+                required={isRegistering}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="block text-xs font-black text-slate-500 uppercase ml-1 tracking-widest">Code secret</label>
+            <label className="block text-xs font-black text-slate-500 uppercase ml-1 tracking-widest">
+              {isRegistering ? "Mot de passe (6 car. min)" : "Code secret ou Mot de passe"}
+            </label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
                 <Lock size={20} />
@@ -91,6 +163,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
                 onChange={(e) => setAccessCode(e.target.value)}
                 className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-slate-800 font-bold placeholder:text-slate-400/70 transition-all outline-none"
                 placeholder="••••••••"
+                required
+                minLength={isRegistering ? 6 : 1}
               />
             </div>
           </div>
@@ -104,12 +178,41 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
 
           <button
             type="submit"
-            className="w-full flex justify-center items-center py-4 px-6 rounded-2xl shadow-xl shadow-emerald-500/25 text-white bg-emerald-600 hover:bg-emerald-700 font-black text-lg transition-all transform active:scale-[0.98] mt-6"
+            disabled={isLoading}
+            className={`
+              w-full flex justify-center items-center py-4 px-6 rounded-2xl shadow-xl text-white font-black text-lg transition-all transform active:scale-[0.98] mt-6
+              ${isRegistering 
+                ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/25' 
+                : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/25'
+              }
+              ${isLoading ? 'opacity-80 cursor-wait' : ''}
+            `}
           >
-            <LogIn size={22} className="mr-3" strokeWidth={3} />
-            se connecter
+            {isLoading ? (
+               <div className="animate-spin rounded-full h-6 w-6 border-4 border-white border-t-transparent"></div>
+            ) : isRegistering ? (
+              <>
+                <UserPlus size={22} className="mr-3" strokeWidth={3} />
+                Créer le compte
+              </>
+            ) : (
+              <>
+                <LogIn size={22} className="mr-3" strokeWidth={3} />
+                Se connecter
+              </>
+            )}
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <button 
+            onClick={toggleMode}
+            className="text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors flex items-center justify-center mx-auto gap-2 group"
+          >
+            {isRegistering ? "Déjà un compte ? Se connecter" : "Pas encore de compte ? Créer un compte"}
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
 
         <div className="relative flex py-8 items-center">
             <div className="flex-grow border-t border-slate-100"></div>

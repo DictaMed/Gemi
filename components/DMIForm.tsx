@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Send, X, AlertTriangle, FileText, CheckCircle, Image as ImageIcon } from 'lucide-react';
+import { Camera, Send, X, AlertTriangle, FileText, CheckCircle, Image as ImageIcon, FolderOpen } from 'lucide-react';
 import { UserCredentials } from '../types';
 import { WEBHOOK_URLS } from '../config/webhooks';
 import { db } from '../config/firebase';
@@ -10,6 +10,7 @@ interface DMIFormProps {
 }
 
 export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
+  const [patientId, setPatientId] = useState('');
   const [text, setText] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,7 +56,8 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
   };
 
   const handleSubmit = async () => {
-    if (!text.trim() && images.length === 0) return;
+    // Validation : Le numéro de dossier est obligatoire, et il faut soit du texte soit des images
+    if (!patientId.trim() || (!text.trim() && images.length === 0)) return;
 
     setIsSubmitting(true);
     setSubmitError(null);
@@ -74,6 +76,7 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
         const formDataText = new FormData();
         formDataText.append('nom_prenom_user', userName);
         formDataText.append('email', userEmail);
+        formDataText.append('num_dossier', patientId); // Ajout du numéro de dossier
         formDataText.append('Texte_DMI', text);
         
         console.log("Envoi Texte vers:", WEBHOOK_URLS.DMI_TEXT);
@@ -87,6 +90,7 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
         const formDataPhotos = new FormData();
         formDataPhotos.append('nom_prenom_user', userName);
         formDataPhotos.append('email', userEmail);
+        formDataPhotos.append('num_dossier', patientId); // Ajout du numéro de dossier
         
         images.forEach((file, index) => {
           formDataPhotos.append('Photo_DMI', file, `photo_${index + 1}_${file.name}`);
@@ -114,7 +118,9 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
       setTimeout(() => {
         setText('');
         setImages([]);
+        setPatientId(''); // Reset du numéro de dossier
         setSubmitSuccess(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 3000);
 
     } catch (error) {
@@ -132,16 +138,36 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
           <CheckCircle size={48} className="text-emerald-500 animate-bounce" />
         </div>
         <h2 className="text-3xl font-black text-slate-800 mb-3 tracking-tight">Données envoyées !</h2>
-        <p className="text-slate-500 text-lg max-w-md font-bold">Vos données (texte et/ou photos) ont été transmises séparément avec succès.</p>
+        <p className="text-slate-500 text-lg max-w-md font-bold">Le dossier patient n°{patientId} a été transmis avec succès.</p>
       </div>
     );
   }
+
+  const isFormValid = patientId.trim() && (text.trim() || images.length > 0);
 
   return (
     <div className="max-w-4xl mx-auto pb-44 animate-fade-in">
       <div className="mb-10">
         <h2 className="text-4xl font-black text-slate-900 tracking-tight">Mode DMI</h2>
         <p className="text-slate-500 text-base mt-2 font-bold">Saisie rapide d'observations et capture de documents médicaux</p>
+      </div>
+
+      {/* Champ Numéro de Dossier */}
+      <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8 sm:p-10 mb-8 relative overflow-hidden">
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+        <label className="block text-sm font-black text-slate-700 mb-4 flex items-center gap-3 uppercase tracking-widest">
+          <div className="bg-blue-50 p-2 rounded-xl text-blue-600"><FolderOpen size={20} /></div>
+          Identification Patient <span className="text-rose-500">*</span>
+        </label>
+        <div className="relative group">
+           <input
+            type="text"
+            value={patientId}
+            onChange={(e) => setPatientId(e.target.value)}
+            className="block w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-3xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-xl text-slate-800 placeholder:text-slate-300 outline-none"
+            placeholder="Numéro de dossier (ex: 872049)"
+          />
+        </div>
       </div>
 
       <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8 sm:p-10 mb-8">
@@ -212,10 +238,10 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
           
           <button
             onClick={handleSubmit}
-            disabled={(!text && images.length === 0) || isSubmitting}
+            disabled={!isFormValid || isSubmitting}
             className={`
               px-16 py-4.5 rounded-2xl font-black text-xl flex items-center justify-center transition-all shadow-2xl
-              ${(!text && images.length === 0) || isSubmitting
+              ${!isFormValid || isSubmitting
                 ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' 
                 : 'bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-emerald-200 hover:-translate-y-1'
               }
