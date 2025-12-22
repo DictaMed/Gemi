@@ -105,14 +105,25 @@ function App() {
 
     switch (currentTab) {
       case 'normal':
-        if (!user) return <AuthForm onLogin={handleManualLogin} />;
+        if (!user) return (
+           <div className="animate-fade-in">
+              <div className="max-w-md mx-auto mb-8 bg-blue-50 border border-blue-100 p-6 rounded-3xl text-center">
+                 <p className="text-blue-800 font-black">
+                   Veuillez vous identifier pour accéder au <span className="text-emerald-600">mode normal</span>
+                 </p>
+              </div>
+              <AuthForm onLogin={handleManualLogin} />
+           </div>
+        );
         return <DictationForm mode={AppMode.NORMAL} user={user} />;
       
       case 'dmi':
         if (!user) return (
            <div className="animate-fade-in">
               <div className="max-w-md mx-auto mb-8 bg-blue-50 border border-blue-100 p-6 rounded-3xl text-center">
-                 <p className="text-blue-800 font-black">Veuillez vous identifier pour accéder au module DMI</p>
+                 <p className="text-blue-800 font-black">
+                   Veuillez vous identifier pour accéder au <span className="text-emerald-600">mode DMI</span>
+                 </p>
               </div>
               <AuthForm onLogin={handleManualLogin} />
            </div>
