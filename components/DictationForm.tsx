@@ -3,10 +3,10 @@ import { PlusCircle, MinusCircle, Send, CheckCircle2, AlertTriangle, ExternalLin
 import { AudioRecorder } from './AudioRecorder';
 import { PatientForm } from './PatientForm';
 import { PatientInfo, AudioData, AppMode, UserCredentials } from '../types';
-import { WEBHOOK_URLS } from '../config/webhooks';
 import { db } from '../config/firebase';
 import { doc, updateDoc, increment, setDoc } from 'firebase/firestore';
 import { mergeAudioBlobs } from '../utils/audioUtils';
+import { webhookService } from '../services/webhookService';
 
 interface DictationFormProps {
   mode: AppMode;
@@ -78,17 +78,13 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
     try {
       const formData = new FormData();
       // Extraction du nom pour affichage (ex: jean.marc.dupont -> jean marc dupont)
-      // Utilisation d'une regex globale (/\./g) pour remplacer TOUS les points
       const userName = user.login.split('@')[0].replace(/\./g, ' '); 
       
       // Envoi des métadonnées
       formData.append('nom_prenom_user', userName);
-      
-      // CRITIQUE : Envoi de l'email exact de l'utilisateur connecté
       formData.append('email', user.login);
-      
       formData.append('num_dossier', patientInfo.id);
-      formData.append('nom_prenom_patient', patientInfo.name); // Sera envoyé même si vide
+      formData.append('nom_prenom_patient', patientInfo.name); 
 
       const partsToMerge = [blobs.part1, blobs.part2, blobs.part3, blobs.part4].filter((b): b is Blob => b !== null);
       
@@ -99,21 +95,14 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
           formData.append('fichier_audio', mergedBlob, 'audio_complet.wav');
         } catch (err) {
           console.error("Erreur fusion:", err);
-          throw new Error("Erreur technique lors de la fusion.");
+          throw new Error("Erreur technique lors de la fusion audio.");
         }
       } else {
         throw new Error("Aucun audio enregistré.");
       }
 
-      const targetUrl = mode === AppMode.NORMAL ? WEBHOOK_URLS.AUDIO_NORMAL : WEBHOOK_URLS.AUDIO_TEST;
-      
-      // Appel réseau avec gestion souple des erreurs 500 (n8n quirk)
-      const response = await fetch(targetUrl, { method: 'POST', body: formData });
-      
-      // On accepte le statut 500 comme un succès car n8n peut renvoyer 500 même s'il a bien reçu/traité les données
-      if (!response.ok && response.status !== 500) {
-        throw new Error(`Erreur serveur (${response.status})`);
-      }
+      // Utilisation du service centralisé
+      await webhookService.sendAudio(formData, mode);
       
       await updateStats(finalDuration);
 

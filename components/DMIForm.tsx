@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { Camera, Send, X, AlertTriangle, FileText, CheckCircle, Image as ImageIcon, Contact, FolderOpen, User } from 'lucide-react';
 import { UserCredentials } from '../types';
-import { WEBHOOK_URLS } from '../config/webhooks';
 import { db } from '../config/firebase';
 import { doc, updateDoc, increment, setDoc } from 'firebase/firestore';
+import { webhookService } from '../services/webhookService';
 
 interface DMIFormProps {
   user: UserCredentials;
@@ -69,7 +69,7 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
     const userName = user.login.split('@')[0].replace(/\./g, ' '); 
     const userEmail = user.login;
 
-    const submissionPromises: Promise<Response>[] = [];
+    const submissionPromises: Promise<boolean>[] = [];
 
     try {
       // 1. Envoi du TEXTE s'il y en a
@@ -78,13 +78,11 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
         formDataText.append('nom_prenom_user', userName);
         formDataText.append('email', userEmail);
         formDataText.append('num_dossier', patientId);
-        formDataText.append('nom_prenom_patient', patientName); // Ajout du nom du patient
+        formDataText.append('nom_prenom_patient', patientName); 
         formDataText.append('Texte_DMI', text);
         
-        console.log("Envoi Texte vers:", WEBHOOK_URLS.DMI_TEXT);
-        submissionPromises.push(
-          fetch(WEBHOOK_URLS.DMI_TEXT, { method: 'POST', body: formDataText })
-        );
+        // Appel via le service centralisé
+        submissionPromises.push(webhookService.sendDMIText(formDataText));
       }
 
       // 2. Envoi des PHOTOS s'il y en a
@@ -93,27 +91,18 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
         formDataPhotos.append('nom_prenom_user', userName);
         formDataPhotos.append('email', userEmail);
         formDataPhotos.append('num_dossier', patientId);
-        formDataPhotos.append('nom_prenom_patient', patientName); // Ajout du nom du patient
+        formDataPhotos.append('nom_prenom_patient', patientName); 
         
         images.forEach((file, index) => {
           formDataPhotos.append('Photo_DMI', file, `photo_${index + 1}_${file.name}`);
         });
 
-        console.log("Envoi Photos vers:", WEBHOOK_URLS.DMI_PHOTOS);
-        submissionPromises.push(
-          fetch(WEBHOOK_URLS.DMI_PHOTOS, { method: 'POST', body: formDataPhotos })
-        );
+        // Appel via le service centralisé
+        submissionPromises.push(webhookService.sendDMIPhotos(formDataPhotos));
       }
 
-      // Exécution parallèle des envois
-      const responses = await Promise.all(submissionPromises);
-
-      // Vérification des résultats (tolérance 500 pour n8n)
-      for (const response of responses) {
-        if (!response.ok && response.status !== 500) {
-          throw new Error(`Erreur serveur (${response.status}) sur l'un des envois`);
-        }
-      }
+      // Exécution parallèle des envois via le service
+      await Promise.all(submissionPromises);
 
       await updateStats(wordCount);
       setSubmitSuccess(true);
@@ -156,7 +145,7 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
         <p className="text-slate-500 text-base mt-2 font-bold">Saisie rapide d'observations et capture de documents médicaux</p>
       </div>
 
-      {/* Bloc Identification Patient (Similaire au Mode Normal) */}
+      {/* Bloc Identification Patient */}
       <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8 sm:p-10 mb-8 relative overflow-hidden">
         <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
         <div className="flex items-center gap-4 mb-6">
