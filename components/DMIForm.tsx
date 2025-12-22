@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Send, X, AlertTriangle, FileText, CheckCircle, Image as ImageIcon, FolderOpen } from 'lucide-react';
+import { Camera, Send, X, AlertTriangle, FileText, CheckCircle, Image as ImageIcon, Contact, FolderOpen, User } from 'lucide-react';
 import { UserCredentials } from '../types';
 import { WEBHOOK_URLS } from '../config/webhooks';
 import { db } from '../config/firebase';
@@ -11,6 +11,7 @@ interface DMIFormProps {
 
 export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
   const [patientId, setPatientId] = useState('');
+  const [patientName, setPatientName] = useState('');
   const [text, setText] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,7 +77,8 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
         const formDataText = new FormData();
         formDataText.append('nom_prenom_user', userName);
         formDataText.append('email', userEmail);
-        formDataText.append('num_dossier', patientId); // Ajout du numéro de dossier
+        formDataText.append('num_dossier', patientId);
+        formDataText.append('nom_prenom_patient', patientName); // Ajout du nom du patient
         formDataText.append('Texte_DMI', text);
         
         console.log("Envoi Texte vers:", WEBHOOK_URLS.DMI_TEXT);
@@ -90,7 +92,8 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
         const formDataPhotos = new FormData();
         formDataPhotos.append('nom_prenom_user', userName);
         formDataPhotos.append('email', userEmail);
-        formDataPhotos.append('num_dossier', patientId); // Ajout du numéro de dossier
+        formDataPhotos.append('num_dossier', patientId);
+        formDataPhotos.append('nom_prenom_patient', patientName); // Ajout du nom du patient
         
         images.forEach((file, index) => {
           formDataPhotos.append('Photo_DMI', file, `photo_${index + 1}_${file.name}`);
@@ -118,7 +121,8 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
       setTimeout(() => {
         setText('');
         setImages([]);
-        setPatientId(''); // Reset du numéro de dossier
+        setPatientId('');
+        setPatientName('');
         setSubmitSuccess(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 3000);
@@ -152,21 +156,53 @@ export const DMIForm: React.FC<DMIFormProps> = ({ user }) => {
         <p className="text-slate-500 text-base mt-2 font-bold">Saisie rapide d'observations et capture de documents médicaux</p>
       </div>
 
-      {/* Champ Numéro de Dossier */}
+      {/* Bloc Identification Patient (Similaire au Mode Normal) */}
       <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8 sm:p-10 mb-8 relative overflow-hidden">
         <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
-        <label className="block text-sm font-black text-slate-700 mb-4 flex items-center gap-3 uppercase tracking-widest">
-          <div className="bg-blue-50 p-2 rounded-xl text-blue-600"><FolderOpen size={20} /></div>
-          Identification Patient <span className="text-rose-500">*</span>
-        </label>
-        <div className="relative group">
-           <input
-            type="text"
-            value={patientId}
-            onChange={(e) => setPatientId(e.target.value)}
-            className="block w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-3xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-xl text-slate-800 placeholder:text-slate-300 outline-none"
-            placeholder="Numéro de dossier (ex: 872049)"
-          />
+        <div className="flex items-center gap-4 mb-6">
+          <div className="bg-blue-50 p-2.5 rounded-xl text-blue-600 shadow-sm border border-blue-100">
+            <Contact size={24} strokeWidth={2.5} />
+          </div>
+          <label className="block text-lg font-bold text-slate-800 tracking-tight">
+            Identification Patient
+          </label>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-600 ml-1 uppercase tracking-wide">
+              Numéro de Dossier <span className="text-rose-500">*</span>
+            </label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <FolderOpen size={18} className="text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              </div>
+              <input
+                type="text"
+                value={patientId}
+                onChange={(e) => setPatientId(e.target.value)}
+                className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-slate-800 placeholder:text-slate-300"
+                placeholder="Ex: 872049"
+              />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-600 ml-1 uppercase tracking-wide">
+              Identité Complète
+            </label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <User size={18} className="text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              </div>
+              <input
+                type="text"
+                value={patientName}
+                onChange={(e) => setPatientName(e.target.value)}
+                className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-slate-800 placeholder:text-slate-300"
+                placeholder="NOM Prénom (Optionnel)"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
