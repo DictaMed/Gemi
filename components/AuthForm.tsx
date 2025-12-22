@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Lock, User, ShieldCheck, LogIn, Stethoscope, UserPlus, Mail, ArrowRight } from 'lucide-react';
+import { Lock, User, ShieldCheck, LogIn, Stethoscope, UserPlus, Mail, ArrowRight, KeyRound, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { UserCredentials } from '../types';
-import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 
 interface AuthFormProps {
@@ -10,10 +10,49 @@ interface AuthFormProps {
 
 export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false); // État pour la vue Mot de passe oublié
+  const [resetSuccess, setResetSuccess] = useState(false); // État succès envoi email
+  
   const [login, setLogin] = useState('');
   const [accessCode, setAccessCode] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // --- GESTION MOT DE PASSE OUBLIÉ ---
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!login.trim()) {
+      setError("Veuillez entrer votre adresse email.");
+      return;
+    }
+    
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await sendPasswordResetEmail(auth, login);
+      setResetSuccess(true);
+      setError('');
+    } catch (err: any) {
+      console.error("Erreur reset password:", err);
+      if (err.code === 'auth/user-not-found') {
+        setError("Aucun compte associé à cet email.");
+      } else if (err.code === 'auth/invalid-email') {
+        setError("Format d'email invalide.");
+      } else {
+        setError("Impossible d'envoyer l'email de réinitialisation.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const cancelReset = () => {
+    setIsResettingPassword(false);
+    setResetSuccess(false);
+    setError('');
+  };
+  // -----------------------------------
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,8 +117,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-      // Pour Google, on passe aussi par onLogin pour la cohérence, 
-      // mais App.tsx le gérera via le listener Firebase de toute façon.
       onLogin({ 
         login: user.email || user.uid, 
         accessCode: 'GOOGLE_AUTH_TOKEN' 
@@ -99,6 +136,89 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
     setAccessCode('');
   };
 
+  // --- VUE RÉINITIALISATION MOT DE PASSE ---
+  if (isResettingPassword) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center p-4">
+        <div className="bg-white/95 backdrop-blur-xl p-8 sm:p-12 rounded-[2.5rem] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.12)] w-full max-w-md border border-slate-100 relative overflow-hidden animate-fade-in">
+          
+          <button onClick={cancelReset} className="absolute top-8 left-8 text-slate-400 hover:text-slate-600 transition-colors">
+             <ArrowLeft size={24} />
+          </button>
+
+          <div className="text-center mb-8 mt-4">
+            <div className="bg-orange-50 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-orange-100">
+              <KeyRound className="text-orange-500" size={32} strokeWidth={2} />
+            </div>
+            <h2 className="text-2xl font-black text-slate-800 tracking-tight">Mot de passe oublié ?</h2>
+            <p className="text-slate-500 font-medium text-sm mt-2 px-4">
+              Entrez votre email pour recevoir un lien de réinitialisation.
+            </p>
+          </div>
+
+          {resetSuccess ? (
+             <div className="text-center animate-fade-in">
+                <div className="bg-emerald-50 text-emerald-700 p-6 rounded-2xl border border-emerald-100 mb-8">
+                   <div className="flex justify-center mb-3">
+                     <CheckCircle2 size={32} />
+                   </div>
+                   <p className="font-bold">Email envoyé !</p>
+                   <p className="text-sm mt-1 opacity-90">Vérifiez votre boîte de réception (et vos spams).</p>
+                </div>
+                <button 
+                  onClick={cancelReset}
+                  className="w-full py-4 rounded-2xl font-black text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200"
+                >
+                  Retour à la connexion
+                </button>
+             </div>
+          ) : (
+            <form onSubmit={handlePasswordReset} className="space-y-6">
+              <div className="space-y-2">
+                <label className="block text-xs font-black text-slate-500 uppercase ml-1 tracking-widest">
+                  Votre Email
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-orange-500 transition-colors">
+                    <Mail size={20} />
+                  </div>
+                  <input
+                    type="email"
+                    value={login}
+                    onChange={(e) => setLogin(e.target.value)}
+                    className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 text-slate-800 font-bold placeholder:text-slate-400/70 transition-all outline-none"
+                    placeholder="docteur@exemple.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-bold border border-rose-100 flex items-center gap-3 animate-shake">
+                  <AlertTriangleIcon />
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full flex justify-center items-center py-4 px-6 rounded-2xl shadow-xl text-white font-black text-lg transition-all transform active:scale-[0.98] bg-orange-500 hover:bg-orange-600 shadow-orange-500/25"
+              >
+                {isLoading ? (
+                  <div className="animate-spin rounded-full h-6 w-6 border-4 border-white border-t-transparent"></div>
+                ) : (
+                  "Envoyer le lien"
+                )}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // --- VUE NORMALE (Connexion / Inscription) ---
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
       <div className="bg-white/95 backdrop-blur-xl p-8 sm:p-12 rounded-[2.5rem] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.12)] w-full max-w-md border border-slate-100 ring-1 ring-slate-200/60 relative overflow-hidden transition-all duration-500">
@@ -150,9 +270,21 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-xs font-black text-slate-500 uppercase ml-1 tracking-widest">
-              {isRegistering ? "Mot de passe (6 car. min)" : "Code secret ou Mot de passe"}
-            </label>
+            <div className="flex justify-between items-center ml-1">
+               <label className="block text-xs font-black text-slate-500 uppercase tracking-widest">
+                 {isRegistering ? "Mot de passe (6 car. min)" : "Code secret ou Mot de passe"}
+               </label>
+               {/* LIEN MOT DE PASSE OUBLIÉ (Uniquement en mode Login) */}
+               {!isRegistering && (
+                 <button 
+                   type="button" 
+                   onClick={() => setIsResettingPassword(true)}
+                   className="text-[11px] font-bold text-blue-600 hover:text-blue-700 hover:underline"
+                 >
+                   Mot de passe oublié ?
+                 </button>
+               )}
+            </div>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
                 <Lock size={20} />
@@ -171,7 +303,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
 
           {error && (
             <div className="p-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-bold border border-rose-100 flex items-center gap-3 animate-shake">
-              <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+              <AlertTriangleIcon />
               {error}
             </div>
           )}
@@ -244,3 +376,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
     </div>
   );
 };
+
+// Helper component for icon
+const AlertTriangleIcon = () => (
+  <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+);

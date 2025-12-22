@@ -28,7 +28,8 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
 
   const validateForm = () => {
     if (mode === AppMode.NORMAL) {
-       if (!patientInfo.id.trim() || !patientInfo.name.trim()) return false;
+       // Seul l'ID (Numéro de dossier) est obligatoire désormais
+       if (!patientInfo.id.trim()) return false;
     }
     const hasAudio = Object.values(blobs).some(b => b !== null);
     return hasAudio;
@@ -87,7 +88,7 @@ export const DictationForm: React.FC<DictationFormProps> = ({ mode, user }) => {
       formData.append('email', user.login);
       
       formData.append('num_dossier', patientInfo.id);
-      formData.append('nom_prenom_patient', patientInfo.name);
+      formData.append('nom_prenom_patient', patientInfo.name); // Sera envoyé même si vide
 
       const partsToMerge = [blobs.part1, blobs.part2, blobs.part3, blobs.part4].filter((b): b is Blob => b !== null);
       
