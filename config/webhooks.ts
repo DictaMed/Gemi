@@ -19,7 +19,7 @@ export const WEBHOOK_URLS = {
   // ---------------------------------------------------------
 
   // Webhook pour l'envoi de texte uniquement (Observations)
-  DMI_TEXT: 'https://n8n.srv1104707.hstgr.cloud/webhook/Text',
+  DMI_TEXT: 'https://n8n.srv1104707.hstgr.cloud/webhook/DMI-Text',
 
   // Webhook pour l'envoi de photos uniquement
   DMI_PHOTOS: 'https://n8n.srv1104707.hstgr.cloud/webhook/Photos',
